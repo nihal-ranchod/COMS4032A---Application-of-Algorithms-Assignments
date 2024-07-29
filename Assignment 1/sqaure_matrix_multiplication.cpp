@@ -9,7 +9,7 @@
 using namespace std;
 using namespace std::chrono;
 
-// Function to generate random square matrix of a given size
+// Function -> generate random square matrix
 vector<vector<int>> generateRandomMatrix(int size) {
     vector<vector<int>> matrix(size, vector<int>(size)); // 2D vector of size x size, initialized to 0
     random_device rd; // random device to seed the generator
@@ -23,7 +23,7 @@ vector<vector<int>> generateRandomMatrix(int size) {
     return matrix;
 }
 
-// Function to print a matrix (for debugging)
+// Function -> print matrix (for debugging)
 void printMatrix(const vector<vector<int>>& matrix) {
     for (const auto& row : matrix) {
         for (int val : row) {
@@ -34,7 +34,7 @@ void printMatrix(const vector<vector<int>>& matrix) {
     cout << endl;
 }
 
-// Standard SQUARE-MATRIX-MULIPLY
+// Standard SQUARE-MATRIX-MULTIPLY
 vector<vector<int>> squareMatrixMultiply(vector<vector<int>> A, vector<vector<int>> B) {
     int n = A.size();
     vector<vector<int>> C(n, vector<int>(n, 0));
@@ -48,7 +48,7 @@ vector<vector<int>> squareMatrixMultiply(vector<vector<int>> A, vector<vector<in
     return C;
 }
 
-// Measure the runtime of a algorithm
+// Measure running time algorithm
 template <typename Func>
 long long measureTime(Func f) {
     auto start = high_resolution_clock::now();
