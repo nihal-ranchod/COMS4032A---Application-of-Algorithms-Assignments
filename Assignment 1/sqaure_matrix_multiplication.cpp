@@ -48,7 +48,7 @@ vector<vector<int>> squareMatrixMultiply(vector<vector<int>> A, vector<vector<in
     return C;
 }
 
-// Measure running time algorithm
+// Measure running time of algorithm
 template <typename Func>
 long long measureTime(Func f) {
     auto start = high_resolution_clock::now();
