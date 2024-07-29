@@ -1,0 +1,12 @@
+Dimension, Algorithm, Average Time (microseconds)
+
+2, Square Matrix Multiply, 1
+4, Square Matrix Multiply, 2
+8, Square Matrix Multiply, 9
+16, Square Matrix Multiply, 38
+32, Square Matrix Multiply, 234
+64, Square Matrix Multiply, 1847
+128, Square Matrix Multiply, 14332
+256, Square Matrix Multiply, 125169
+512, Square Matrix Multiply, 1179881
+1024, Square Matrix Multiply, 12707434
