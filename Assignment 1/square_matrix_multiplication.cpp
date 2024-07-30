@@ -196,53 +196,56 @@ vector<vector<int>> strassensAlgorithm(const vector<vector<int>>& A, const vecto
 }
 //--------------------------------------------------------------------------------------
 
-
 // Measure running time of algorithm
 template <typename Func>
 long long measureTime(Func f) {
     auto start = high_resolution_clock::now();
     f();
     auto stop = high_resolution_clock::now();
-    return duration_cast<microseconds>(stop - start).count();
+    return duration_cast<seconds>(stop - start).count();
 }
 
 int main(){
     // Range of dimensions
-    vector<int> dimensions = {2, 4, 8, 16, 32, 64, 128};
-    int numTrials = 5;
+    vector<int> dimensions = {64, 128, 256, 512};
+    int numTrials = 3;
 
     ofstream file("matrix_multiplication.csv");
-    file << "Dimension, Algorithm, Average Time (microseconds)\n" << endl;
+    if (!file.is_open()) {
+        cerr << "Failed to open file for writing." << endl;
+        return 1;
+    }
+    file << "Dimension, Algorithm, Average Time (seconds)" << std::endl;
 
     for (int n : dimensions) {
         long long timeSquareMatrixMultiply = 0;
         long long timeSquareMatrixMultiplyRecursive = 0;
         long long timeStrassensAlgorithm = 0;
 
-        for (int trial = 0; trial < numTrials; trial++){
-            vector<vector<int>> A = generateRandomMatrix(n);
-            vector<vector<int>> B = generateRandomMatrix(n);
+        for (int trial = 0; trial < numTrials; trial++) {
+            auto A = generateRandomMatrix(n);
+            auto B = generateRandomMatrix(n);
 
-            timeSquareMatrixMultiply += measureTime([&](){
+            timeSquareMatrixMultiply += measureTime([&]() {
                 squareMatrixMultiply(A, B);
             });
 
-            timeSquareMatrixMultiplyRecursive += measureTime([&](){
+            timeSquareMatrixMultiplyRecursive += measureTime([&]() {
                 squareMatrixMultiplyRecursive(A, B);
             });
 
-            timeStrassensAlgorithm += measureTime([&](){
+            timeStrassensAlgorithm += measureTime([&]() {
                 strassensAlgorithm(A, B);
             });
         }
 
-        file << n << ", Square Matrix Multiply, " << timeSquareMatrixMultiply / numTrials << endl;
-        file << n << ", Square Matrix Multiply Recursive, " << timeSquareMatrixMultiplyRecursive / numTrials << endl;
-        file << n << ", Strassen's Algorithm, " << timeStrassensAlgorithm / numTrials << endl;
+        file << n << ", Square Matrix Multiply, " << timeSquareMatrixMultiply / numTrials << std::endl;
+        file << n << ", Square Matrix Multiply Recursive, " << timeSquareMatrixMultiplyRecursive / numTrials << std::endl;
+        file << n << ", Strassen's Algorithm, " << timeStrassensAlgorithm / numTrials << std::endl;
     }
 
     file.close();
-    std::cout << "Data written to matrix_multiplication.csv" << endl;
+    cout << "Data written to matrix_multiplication.csv" << endl;
 
     return 0;
 }

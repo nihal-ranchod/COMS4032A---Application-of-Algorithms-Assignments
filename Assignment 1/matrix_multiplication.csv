@@ -1,23 +1,14 @@
-Dimension, Algorithm, Average Time (microseconds)
+Dimension, Algorithm, Average Time (seconds)
 
-2, Square Matrix Multiply, 1
-2, Square Matrix Multiply Recursive, 12
-2, Strassen's Algorithm, 19
-4, Square Matrix Multiply, 1
-4, Square Matrix Multiply Recursive, 96
-4, Strassen's Algorithm, 122
-8, Square Matrix Multiply, 7
-8, Square Matrix Multiply Recursive, 695
-8, Strassen's Algorithm, 832
-16, Square Matrix Multiply, 38
-16, Square Matrix Multiply Recursive, 5986
-16, Strassen's Algorithm, 6046
-32, Square Matrix Multiply, 311
-32, Square Matrix Multiply Recursive, 51854
-32, Strassen's Algorithm, 47981
-64, Square Matrix Multiply, 3011
-64, Square Matrix Multiply Recursive, 468431
-64, Strassen's Algorithm, 369180
-128, Square Matrix Multiply, 55631
-128, Square Matrix Multiply Recursive, 8162173
-128, Strassen's Algorithm, 6604322
+64, Square Matrix Multiply, 0
+64, Square Matrix Multiply Recursive, 0
+64, Strassen's Algorithm, 0
+128, Square Matrix Multiply, 0
+128, Square Matrix Multiply Recursive, 2
+128, Strassen's Algorithm, 1
+256, Square Matrix Multiply, 0
+256, Square Matrix Multiply Recursive, 21
+256, Strassen's Algorithm, 12
+512, Square Matrix Multiply, 1
+512, Square Matrix Multiply Recursive, 169
+512, Strassen's Algorithm, 90
