@@ -49,8 +49,6 @@ vector<vector<int>> squareMatrixMultiply(const vector<vector<int>>& A, const vec
 }
 //--------------------------------------------------------------------------------------
 
-// SQUARE-MATRIX-MULTIPLY-RECURSIVE ----------------------------------------------------
-
 // Function -> add two matrices
 vector<vector<int>> add(const vector<vector<int>>& A, const vector<vector<int>>& B) {
     int n = A.size();
@@ -63,6 +61,42 @@ vector<vector<int>> add(const vector<vector<int>>& A, const vector<vector<int>>&
     return C;
 }
 
+// Function -> subtract two matrices
+vector<vector<int>> subtract(const vector<vector<int>>& A, const vector<vector<int>>& B) {
+    int n = A.size();
+    vector<vector<int>> C(n, vector<int>(n));
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            C[i][j] = A[i][j] - B[i][j];
+        }
+    }
+    return C;
+}
+
+// Function -> pad matrix with zeros to make it a power of 2
+vector<vector<int>> padMatrix(const vector<vector<int>>& A, int newSize) {
+    int n = A.size();
+    vector<vector<int>> paddedMatrix(newSize, vector<int>(newSize, 0));
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            paddedMatrix[i][j] = A[i][j];
+        }
+    }
+    return paddedMatrix;
+}
+
+// Function -> unpad matrix to original size
+vector<vector<int>> unpadMatrix(const vector<vector<int>>& A, int originalSize) {
+    vector<vector<int>> unpaddedMatrix(originalSize, vector<int>(originalSize, 0));
+    for (int i = 0; i < originalSize; i++) {
+        for (int j = 0; j < originalSize; j++) {
+            unpaddedMatrix[i][j] = A[i][j];
+        }
+    }
+    return unpaddedMatrix;
+}
+
+// SQUARE-MATRIX-MULTIPLY-RECURSIVE ----------------------------------------------------
 vector<vector<int>> squareMatrixMultiplyRecursive(const vector<vector<int>>& A, const vector<vector<int>>& B){
     int n = A.size();
     vector<vector<int>> C(n, vector<int>(n, 0));
@@ -114,18 +148,6 @@ vector<vector<int>> squareMatrixMultiplyRecursive(const vector<vector<int>>& A, 
 //--------------------------------------------------------------------------------------
 
 // STRASSSEN'S ALGORITHM ---------------------------------------------------------------
-
-vector<vector<int>> subtract(const vector<vector<int>>& A, const vector<vector<int>>& B) {
-    int n = A.size();
-    vector<vector<int>> C(n, vector<int>(n));
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            C[i][j] = A[i][j] - B[i][j];
-        }
-    }
-    return C;
-}
-
 vector<vector<int>> strassensAlgorithm(const vector<vector<int>>& A, const vector<vector<int>>& B) {
     int n = A.size();
     vector<vector<int>> C(n, vector<int>(n, 0));
@@ -207,7 +229,7 @@ long long measureTime(Func f) {
 
 int main(){
     // Range of dimensions
-    vector<int> dimensions = {64, 128, 256, 512};
+    vector<int> dimensions = {32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480, 512};
     int numTrials = 3;
 
     ofstream file("matrix_multiplication.csv");
@@ -222,21 +244,42 @@ int main(){
         long long timeSquareMatrixMultiplyRecursive = 0;
         long long timeStrassensAlgorithm = 0;
 
+        int newSize = pow(2, ceil(log2(n)));
+        bool needsPadding = newSize != n;
+
         for (int trial = 0; trial < numTrials; trial++) {
             auto A = generateRandomMatrix(n);
             auto B = generateRandomMatrix(n);
 
+            // Meassure time for Square Matrix Multiply (no padding needed)
             timeSquareMatrixMultiply += measureTime([&]() {
                 squareMatrixMultiply(A, B);
             });
 
-            timeSquareMatrixMultiplyRecursive += measureTime([&]() {
-                squareMatrixMultiplyRecursive(A, B);
-            });
+            if (needsPadding) {
+                auto paddedA = padMatrix(A, newSize);
+                auto paddedB = padMatrix(B, newSize);
 
-            timeStrassensAlgorithm += measureTime([&]() {
-                strassensAlgorithm(A, B);
-            });
+                // Measure time for Square Matrix Multiply Recursive with padding
+                timeSquareMatrixMultiplyRecursive += measureTime([&]() {
+                    squareMatrixMultiplyRecursive(paddedA, paddedB);
+                });
+
+                // Measure time for Strassen's Algorithm with padding
+                timeStrassensAlgorithm += measureTime([&]() {
+                    strassensAlgorithm(paddedA, paddedB);
+                });
+            } else {
+                // Measure time for Square Matrix Multiply Recursive without padding
+                timeSquareMatrixMultiplyRecursive += measureTime([&]() {
+                    squareMatrixMultiplyRecursive(A, B);
+                });
+
+                // Measure time for Strassen's Algorithm without padding
+                timeStrassensAlgorithm += measureTime([&]() {
+                    strassensAlgorithm(A, B);
+                });
+            }
         }
 
         file << n << ", Square Matrix Multiply, " << timeSquareMatrixMultiply / numTrials << std::endl;
