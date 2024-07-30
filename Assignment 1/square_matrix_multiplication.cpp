@@ -113,6 +113,7 @@ vector<vector<int>> squareMatrixMultiplyRecursive(const vector<vector<int>>& A, 
 }
 //--------------------------------------------------------------------------------------
 
+// STRASSSEN'S ALGORITHM ---------------------------------------------------------------
 
 vector<vector<int>> subtract(const vector<vector<int>>& A, const vector<vector<int>>& B) {
     int n = A.size();
@@ -125,6 +126,77 @@ vector<vector<int>> subtract(const vector<vector<int>>& A, const vector<vector<i
     return C;
 }
 
+vector<vector<int>> strassensAlgorithm(const vector<vector<int>>& A, const vector<vector<int>>& B) {
+    int n = A.size();
+    vector<vector<int>> C(n, vector<int>(n, 0));
+
+    if (n == 1) {
+        C[0][0] = A[0][0] * B[0][0];
+    } else {
+        int newSize = n / 2;
+        vector<vector<int>> A11(newSize, vector<int>(newSize));
+        vector<vector<int>> A12(newSize, vector<int>(newSize));
+        vector<vector<int>> A21(newSize, vector<int>(newSize));
+        vector<vector<int>> A22(newSize, vector<int>(newSize));
+        vector<vector<int>> B11(newSize, vector<int>(newSize));
+        vector<vector<int>> B12(newSize, vector<int>(newSize));
+        vector<vector<int>> B21(newSize, vector<int>(newSize));
+        vector<vector<int>> B22(newSize, vector<int>(newSize));
+
+        for (int i = 0; i < newSize; ++i) {
+            for (int j = 0; j < newSize; ++j) {
+                A11[i][j] = A[i][j];
+                A12[i][j] = A[i][j + newSize];
+                A21[i][j] = A[i + newSize][j];
+                A22[i][j] = A[i + newSize][j + newSize];
+
+                B11[i][j] = B[i][j];
+                B12[i][j] = B[i][j + newSize];
+                B21[i][j] = B[i + newSize][j];
+                B22[i][j] = B[i + newSize][j + newSize];
+            }
+        }
+
+        vector<vector<int>> S1 = subtract(B12, B22);
+        vector<vector<int>> S2 = add(A11, A12);
+        vector<vector<int>> S3 = add(A21, A22);
+        vector<vector<int>> S4 = subtract(B21, B11);
+        vector<vector<int>> S5 = add(A11, A22);
+        vector<vector<int>> S6 = add(B11, B22);
+        vector<vector<int>> S7 = subtract(A12, A22);
+        vector<vector<int>> S8 = add(B21, B22);
+        vector<vector<int>> S9 = subtract(A11, A21);    
+        vector<vector<int>> S10 = add(B11, B12);
+
+        vector<vector<int>> P1 = strassensAlgorithm(A11, S1);
+        vector<vector<int>> P2 = strassensAlgorithm(S2, B22);
+        vector<vector<int>> P3 = strassensAlgorithm(S3, B11);
+        vector<vector<int>> P4 = strassensAlgorithm(A22, S4);
+        vector<vector<int>> P5 = strassensAlgorithm(S5, S6);
+        vector<vector<int>> P6 = strassensAlgorithm(S7, S8);
+        vector<vector<int>> P7 = strassensAlgorithm(S9, S10);
+
+        vector<vector<int>> C11 = add(subtract(add(P5, P4), P2), P6);
+        vector<vector<int>> C12 = add(P1, P2);
+        vector<vector<int>> C21 = add(P3, P4);
+        vector<vector<int>> C22 = subtract(subtract(add(P5, P1), P3), P7);
+
+        for (int i = 0; i < newSize; ++i) {
+            for (int j = 0; j < newSize; ++j) {
+                C[i][j] = C11[i][j];
+                C[i][j + newSize] = C12[i][j];
+                C[i + newSize][j] = C21[i][j];
+                C[i + newSize][j + newSize] = C22[i][j];
+            }
+        }
+
+    }
+
+    return C;
+}
+//--------------------------------------------------------------------------------------
+
+
 // Measure running time of algorithm
 template <typename Func>
 long long measureTime(Func f) {
@@ -136,7 +208,7 @@ long long measureTime(Func f) {
 
 int main(){
     // Range of dimensions
-    vector<int> dimensions = {2, 4, 8, 16, 32, 64, 128, 256};
+    vector<int> dimensions = {2, 4, 8, 16, 32, 64, 128};
     int numTrials = 5;
 
     ofstream file("matrix_multiplication.csv");
@@ -145,6 +217,7 @@ int main(){
     for (int n : dimensions) {
         long long timeSquareMatrixMultiply = 0;
         long long timeSquareMatrixMultiplyRecursive = 0;
+        long long timeStrassensAlgorithm = 0;
 
         for (int trial = 0; trial < numTrials; trial++){
             vector<vector<int>> A = generateRandomMatrix(n);
@@ -157,10 +230,15 @@ int main(){
             timeSquareMatrixMultiplyRecursive += measureTime([&](){
                 squareMatrixMultiplyRecursive(A, B);
             });
+
+            timeStrassensAlgorithm += measureTime([&](){
+                strassensAlgorithm(A, B);
+            });
         }
 
         file << n << ", Square Matrix Multiply, " << timeSquareMatrixMultiply / numTrials << endl;
         file << n << ", Square Matrix Multiply Recursive, " << timeSquareMatrixMultiplyRecursive / numTrials << endl;
+        file << n << ", Strassen's Algorithm, " << timeStrassensAlgorithm / numTrials << endl;
     }
 
     file.close();
