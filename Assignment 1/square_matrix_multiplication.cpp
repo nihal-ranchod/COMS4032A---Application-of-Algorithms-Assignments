@@ -27,15 +27,15 @@ vector<vector<int>> generateRandomMatrix(int size) {
 void printMatrix(const vector<vector<int>>& matrix) {
     for (const auto& row : matrix) {
         for (int val : row) {
-            cout << setw(5) << val << " ";
+            std::cout << setw(5) << val << " ";
         }
-        cout << endl;
+        std::cout << endl;
     }
-    cout << endl;
+    std::cout << endl;
 }
 
-// Standard SQUARE-MATRIX-MULTIPLY
-vector<vector<int>> squareMatrixMultiply(vector<vector<int>> A, vector<vector<int>> B) {
+// Standard SQUARE-MATRIX-MULTIPLY ----------------------------------------------------
+vector<vector<int>> squareMatrixMultiply(const vector<vector<int>>& A, const vector<vector<int>>& B) {
     int n = A.size();
     vector<vector<int>> C(n, vector<int>(n, 0));
     for (int i = 0; i < n; i++) {
@@ -43,6 +43,83 @@ vector<vector<int>> squareMatrixMultiply(vector<vector<int>> A, vector<vector<in
             for (int k = 0; k < n; k++) {
                 C[i][j] += A[i][k] * B[k][j];
             }
+        }
+    }
+    return C;
+}
+//--------------------------------------------------------------------------------------
+
+// SQUARE-MATRIX-MULTIPLY-RECURSIVE ----------------------------------------------------
+
+// Function -> add two matrices
+vector<vector<int>> add(const vector<vector<int>>& A, const vector<vector<int>>& B) {
+    int n = A.size();
+    vector<vector<int>> C(n, vector<int>(n));
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            C[i][j] = A[i][j] + B[i][j];
+        }
+    }
+    return C;
+}
+
+vector<vector<int>> squareMatrixMultiplyRecursive(const vector<vector<int>>& A, const vector<vector<int>>& B){
+    int n = A.size();
+    vector<vector<int>> C(n, vector<int>(n, 0));
+
+    if (n == 1){
+        C[0][0] = A[0][0] * B[0][0];
+    } else {
+        int newSize = n / 2;
+        vector<vector<int>> A11(newSize, vector<int>(newSize));
+        vector<vector<int>> A12(newSize, vector<int>(newSize));
+        vector<vector<int>> A21(newSize, vector<int>(newSize));
+        vector<vector<int>> A22(newSize, vector<int>(newSize));
+        vector<vector<int>> B11(newSize, vector<int>(newSize));
+        vector<vector<int>> B12(newSize, vector<int>(newSize));
+        vector<vector<int>> B21(newSize, vector<int>(newSize));
+        vector<vector<int>> B22(newSize, vector<int>(newSize));
+
+        for (int i = 0; i < newSize; ++i) {
+            for (int j = 0; j < newSize; ++j) {
+                A11[i][j] = A[i][j];
+                A12[i][j] = A[i][j + newSize];
+                A21[i][j] = A[i + newSize][j];
+                A22[i][j] = A[i + newSize][j + newSize];
+
+                B11[i][j] = B[i][j];
+                B12[i][j] = B[i][j + newSize];
+                B21[i][j] = B[i + newSize][j];
+                B22[i][j] = B[i + newSize][j + newSize];
+            }
+        }
+
+        vector<vector<int>> C11 = add(squareMatrixMultiplyRecursive(A11, B11), squareMatrixMultiplyRecursive(A12, B21));
+        vector<vector<int>> C12 = add(squareMatrixMultiplyRecursive(A11, B12), squareMatrixMultiplyRecursive(A12, B22));
+        vector<vector<int>> C21 = add(squareMatrixMultiplyRecursive(A21, B11), squareMatrixMultiplyRecursive(A22, B21));
+        vector<vector<int>> C22 = add(squareMatrixMultiplyRecursive(A21, B12), squareMatrixMultiplyRecursive(A22, B22));
+
+        for (int i = 0; i < newSize; ++i) {
+            for (int j = 0; j < newSize; ++j) {
+                C[i][j] = C11[i][j];
+                C[i][j + newSize] = C12[i][j];
+                C[i + newSize][j] = C21[i][j];
+                C[i + newSize][j + newSize] = C22[i][j];
+            }
+        }
+    }
+
+    return C;
+}
+//--------------------------------------------------------------------------------------
+
+
+vector<vector<int>> subtract(const vector<vector<int>>& A, const vector<vector<int>>& B) {
+    int n = A.size();
+    vector<vector<int>> C(n, vector<int>(n));
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            C[i][j] = A[i][j] - B[i][j];
         }
     }
     return C;
@@ -59,7 +136,7 @@ long long measureTime(Func f) {
 
 int main(){
     // Range of dimensions
-    vector<int> dimensions = {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024};
+    vector<int> dimensions = {2, 4, 8, 16, 32, 64, 128, 256};
     int numTrials = 5;
 
     ofstream file("matrix_multiplication.csv");
@@ -67,6 +144,7 @@ int main(){
 
     for (int n : dimensions) {
         long long timeSquareMatrixMultiply = 0;
+        long long timeSquareMatrixMultiplyRecursive = 0;
 
         for (int trial = 0; trial < numTrials; trial++){
             vector<vector<int>> A = generateRandomMatrix(n);
@@ -75,13 +153,18 @@ int main(){
             timeSquareMatrixMultiply += measureTime([&](){
                 squareMatrixMultiply(A, B);
             });
+
+            timeSquareMatrixMultiplyRecursive += measureTime([&](){
+                squareMatrixMultiplyRecursive(A, B);
+            });
         }
 
         file << n << ", Square Matrix Multiply, " << timeSquareMatrixMultiply / numTrials << endl;
+        file << n << ", Square Matrix Multiply Recursive, " << timeSquareMatrixMultiplyRecursive / numTrials << endl;
     }
 
     file.close();
-    cout << "Data written to matrix_multiplication.csv" << endl;
+    std::cout << "Data written to matrix_multiplication.csv" << endl;
 
     return 0;
 }

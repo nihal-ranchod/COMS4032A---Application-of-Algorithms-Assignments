@@ -1,12 +1,18 @@
 Dimension, Algorithm, Average Time (microseconds)
 
-2, Square Matrix Multiply, 1
-4, Square Matrix Multiply, 2
+2, Square Matrix Multiply, 2
+2, Square Matrix Multiply Recursive, 13
+4, Square Matrix Multiply, 1
+4, Square Matrix Multiply Recursive, 98
 8, Square Matrix Multiply, 8
-16, Square Matrix Multiply, 61
-32, Square Matrix Multiply, 232
-64, Square Matrix Multiply, 1752
-128, Square Matrix Multiply, 14470
-256, Square Matrix Multiply, 122247
-512, Square Matrix Multiply, 1039367
-1024, Square Matrix Multiply, 12521189
+8, Square Matrix Multiply Recursive, 766
+16, Square Matrix Multiply, 41
+16, Square Matrix Multiply Recursive, 5628
+32, Square Matrix Multiply, 319
+32, Square Matrix Multiply Recursive, 50373
+64, Square Matrix Multiply, 2546
+64, Square Matrix Multiply Recursive, 383607
+128, Square Matrix Multiply, 46395
+128, Square Matrix Multiply Recursive, 7120407
+256, Square Matrix Multiply, 506405
+256, Square Matrix Multiply Recursive, 74489551
