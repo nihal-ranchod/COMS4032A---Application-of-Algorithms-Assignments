@@ -160,12 +160,35 @@ Matrix generateRandomMatrix(int n) {
     return matrix;
 }
 
+Matrix padMatrix(const Matrix &A, int newSize) {
+    int oldSize = A.size();
+    Matrix padded(newSize, vector<int>(newSize, 0));
+    for (int i = 0; i < oldSize; ++i) {
+        for (int j = 0; j < oldSize; ++j) {
+            padded[i][j] = A[i][j];
+        }
+    }
+    return padded;
+}
+
+Matrix unpadMatrix(const Matrix &A, int originalSize) {
+    Matrix unpadded(originalSize, vector<int>(originalSize));
+    for (int i = 0; i < originalSize; ++i) {
+        for (int j = 0; j < originalSize; ++j) {
+            unpadded[i][j] = A[i][j];
+        }
+    }
+    return unpadded;
+}    
+
 tuple<double, double, double> measureTime(int n) {
     double standardTime = 0.0;
     double recursiveTime = 0.0;
     double strassenTime = 0.0;
 
-    for (int i = 0; i < 3; ++i) {
+    int newSize = pow(2, ceil(log2(n)));
+
+    for (int i = 0; i < 1; ++i) {
         Matrix A = generateRandomMatrix(n);
         Matrix B = generateRandomMatrix(n);
 
@@ -174,22 +197,25 @@ tuple<double, double, double> measureTime(int n) {
         auto end = chrono::high_resolution_clock::now();
         standardTime += chrono::duration<double>(end - start).count();
 
+        Matrix paddedA = (newSize == n) ? A : padMatrix(A, newSize);
+        Matrix paddedB = (newSize == n) ? B : padMatrix(B, newSize);
+
         start = chrono::high_resolution_clock::now();
-        Matrix C2 = squareMatrixMultiplyRecursive(A, B);
+        Matrix C2 = squareMatrixMultiplyRecursive(paddedA, paddedB);
         end = chrono::high_resolution_clock::now();
         recursiveTime += chrono::duration<double>(end - start).count();
 
         start = chrono::high_resolution_clock::now();
-        Matrix C3 = strassen(A, B);
+        Matrix C3 = strassen(paddedA, paddedB);
         end = chrono::high_resolution_clock::now();
         strassenTime += chrono::duration<double>(end - start).count();
     }
 
-    return {standardTime / 3, recursiveTime / 3, strassenTime / 3};
+    return {standardTime / 1, recursiveTime / 1, strassenTime / 1};
 }
 
 int main() {
-    vector<int> dimensions = {64, 128, 256, 512};
+    vector<int> dimensions = {64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480, 512};
     ofstream csvFile("matrix_multiplication_times.csv");
 
     csvFile << "Dimension,Standard,Recursive,Strassen\n";
