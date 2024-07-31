@@ -188,7 +188,7 @@ tuple<double, double, double> measureTime(int n) {
 
     int newSize = pow(2, ceil(log2(n)));
 
-    for (int i = 0; i < 1; ++i) {
+    for (int i = 0; i < 3; ++i) {
         Matrix A = generateRandomMatrix(n);
         Matrix B = generateRandomMatrix(n);
 
@@ -211,7 +211,7 @@ tuple<double, double, double> measureTime(int n) {
         strassenTime += chrono::duration<double>(end - start).count();
     }
 
-    return {standardTime / 1, recursiveTime / 1, strassenTime / 1};
+    return {standardTime / 3, recursiveTime / 3, strassenTime / 3};
 }
 
 int main() {
