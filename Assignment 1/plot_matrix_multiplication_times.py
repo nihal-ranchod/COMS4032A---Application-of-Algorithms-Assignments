@@ -17,7 +17,7 @@ plt.plot(dimensions, recursive_times, label="Square Matrix Multiplication Recurs
 plt.plot(dimensions, strassen_times, label="Strassen's Algorithm", marker='o', color='green')
 
 # Customize the plot
-plt.title('Running Times of Matrix Multiplication Algorithms')
+plt.title('Running Times of Square Matrix Multiplication Algorithms')
 plt.xlabel('Dimension')
 plt.xticks([64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480, 512])
 plt.ylabel('Time (seconds)')
