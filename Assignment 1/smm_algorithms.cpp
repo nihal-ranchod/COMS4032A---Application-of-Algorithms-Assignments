@@ -1,3 +1,4 @@
+#include "matrix_multiplication.h"
 #include <iostream>
 #include <vector>
 #include <chrono>
@@ -188,7 +189,7 @@ tuple<double, double, double> measureTime(int n) {
 
     int newSize = pow(2, ceil(log2(n)));
 
-    for (int i = 0; i < 3; ++i) {
+    for (int i = 0; i < 1; ++i) {
         Matrix A = generateRandomMatrix(n);
         Matrix B = generateRandomMatrix(n);
 
@@ -211,20 +212,5 @@ tuple<double, double, double> measureTime(int n) {
         strassenTime += chrono::duration<double>(end - start).count();
     }
 
-    return {standardTime / 3, recursiveTime / 3, strassenTime / 3};
-}
-
-int main() {
-    vector<int> dimensions = {64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480, 512};
-    ofstream csvFile("matrix_multiplication_times.csv");
-
-    csvFile << "Dimension,Standard,Recursive,Strassen\n";
-
-    for (int n : dimensions) {
-        auto times = measureTime(n);
-        csvFile << n << "," << get<0>(times) << "," << get<1>(times) << "," << get<2>(times) << "\n";
-    }
-
-    csvFile.close();
-    return 0;
+    return {standardTime / 1, recursiveTime / 1, strassenTime / 1};
 }

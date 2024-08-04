@@ -7,7 +7,7 @@
 ### To run the algorihms and measure their runtimes:
 ```bash
 g++ measure_runtime.cpp smm_algorithms.cpp -o measure_time
-./measure time
+./measure_time
 ```
 
 ### To run the correctness check file:
