@@ -4,7 +4,7 @@
 
 ### Assignment 1: [Assignment 1 PDF](./Assignment%201/Assignment1.pdf)
 
-### To run the algorihms and measure their runtimes:
+### To run all algorithms and measure their runtimes:
 ```bash
 g++ measure_runtime.cpp smm_algorithms.cpp -o measure_time
 ./measure_time
