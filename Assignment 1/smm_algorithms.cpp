@@ -182,6 +182,7 @@ Matrix unpadMatrix(const Matrix &A, int originalSize) {
     return unpadded;
 }    
 
+// Averages over 3 runs
 tuple<double, double, double> measureTime(int n) {
     double standardTime = 0.0;
     double recursiveTime = 0.0;
