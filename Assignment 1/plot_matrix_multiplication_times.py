@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Read the CSV file
-data = pd.read_csv("Assignment 1/matrix_multiplication_times_run2.csv")
+data = pd.read_csv("Assignment 1/matrix_multiplication_runtimes.csv")
 
 # Extract columns
 dimensions = data['Dimension']
