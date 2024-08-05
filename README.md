@@ -15,3 +15,9 @@ g++ measure_runtime.cpp smm_algorithms.cpp -o measure_time
 g++ correctness_check.cpp smm_algorithms.cpp -o check
 ./check
 ```
+
+### To run the memory usage file:
+```bash
+g++ measure_memory_usage.cpp smm_algorithms.cpp -o usage -lpsapi
+./usage
+```
