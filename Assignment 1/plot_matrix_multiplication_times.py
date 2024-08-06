@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Read the CSV file
-data = pd.read_csv("Assignment 1/matrix_multiplication_runtimes.csv")
+data = pd.read_csv("Assignment 1/Runtimes_and_Graphs/matrix_multiplication_runtimes.csv")
 
 # Extract columns
 dimensions = data['Dimension']
@@ -23,5 +23,5 @@ plt.xticks([64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480, 
 plt.ylabel('Time (seconds)')
 plt.legend()
 plt.grid(True)
-plt.savefig("Assignment 1/matrix_multiplication_runtimes.png")
+plt.savefig("Assignment 1/Runtimes_and_Graphs/matrix_multiplication_runtimes.png")
 plt.show()

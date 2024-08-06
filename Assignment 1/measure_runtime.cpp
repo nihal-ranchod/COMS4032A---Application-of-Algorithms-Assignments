@@ -13,7 +13,7 @@ typedef vector<vector<int>> Matrix;
 
 int main() {
     vector<int> dimensions = {64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480, 512};
-    ofstream csvFile("matrix_multiplication_times2.csv");
+    ofstream csvFile("Runtimes_and_Graphs/matrix_multiplication_runtimes.csv");
 
     csvFile << "Dimension,Standard,Recursive,Strassen\n";
 
