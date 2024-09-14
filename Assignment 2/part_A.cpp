@@ -47,6 +47,45 @@ struct BinarySearchTree {
         }
     }
 
+    TreeNode* TreeMinimum(TreeNode* node) {
+        while (node->left != nullptr) {
+            node = node->left;
+        }
+        return node;
+    }
+
+    void Transplant(TreeNode* u, TreeNode* v) {
+        if (u->parent == nullptr) {
+            root = v;
+        } else if (u == u->parent->left) {
+            u->parent->left = v;
+        } else {
+            u->parent->right = v;
+        }
+
+        if (v != nullptr) {
+            v->parent = u->parent;
+        }
+    }
+
+    void TreeDelete(TreeNode* node, int key) {
+        if (node->left == nullptr) {
+            Transplant(node, node->right);
+        } else if (node->right == nullptr) {
+            Transplant(node, node->left);
+        } else {
+            TreeNode* temp = TreeMinimum(node->right); // Successr of the node
+            if (temp->parent != node) {
+                Transplant(temp, temp->right);
+                temp->right = node->right;
+                temp->right->parent = temp;
+            }
+            Transplant(node, temp);
+            temp->left = node->left;
+            temp->left->parent = temp;
+        }
+    }
+
     void InorderTreeWalk(TreeNode* node) {
         if (node != nullptr) {
             InorderTreeWalk(node->left);
@@ -75,6 +114,16 @@ struct BinarySearchTree {
             }
         }
     }
+
+    // Delete all nodes of the BST are deleted and memory is deallocated
+    // TreeNode* DestroyTree(TreeNode* root) {
+    //     if (root != nullptr) {
+    //         DestroyTree(root->left);
+    //         DestroyTree(root->right);
+    //         delete root;
+    //     }
+    //     return nullptr;
+    // }
 };
 
 int main() {
@@ -83,17 +132,19 @@ int main() {
     vector<int> keys;
     vector<double> heights;
     vector<double> buildTimes;
+    vector<double> destroyTimes;
 
     int nValues[] = {10, 50, 100, 500, 1000, 5000, 10000, 50000, 100000};
 
     ofstream file("bst_results.csv");
-    file << "n,avg_height,avg_build_time" << endl;
+    file << "n,avg_height,avg_build_time,avg_destroy_time" << endl;
 
     for (int n : nValues) {
         double totalHeight = 0;
         double totalBuildTime = 0;
+        double totalDestroyTime = 0;
 
-        int trials = 10;
+        int trials = 50;
 
         for (int i = 0; i < trials; i++) {
             keys.clear();
@@ -103,22 +154,32 @@ int main() {
             random_shuffle(keys.begin(), keys.end());
 
             BinarySearchTree bst;
-            auto start = high_resolution_clock::now();
+            auto startBuild = high_resolution_clock::now();
             for (int key : keys) {
                 bst.TreeInsert(key);
             }
-            auto stop = high_resolution_clock::now();
+            auto stopBuild = high_resolution_clock::now();
 
-            auto duration = duration_cast<microseconds>(stop - start);
-            totalBuildTime += duration.count();
+            auto durationBuild = duration_cast<microseconds>(stopBuild - startBuild);
+            totalBuildTime += durationBuild.count();
 
             totalHeight += bst.CalculateHeight(bst.root);
+
+            auto startDestroy = high_resolution_clock::now();
+            for (int key : keys) {
+                bst.TreeDelete(bst.root, key);
+            }
+            auto stopDestroy = high_resolution_clock::now();
+
+            auto durationDestroy = duration_cast<microseconds>(stopDestroy - startDestroy);
+            totalDestroyTime += durationDestroy.count();
         }
 
         double avgHeight = totalHeight / trials;
         double avgBuildTime = totalBuildTime / trials;
+        double avgDestroyTime = totalDestroyTime / trials;
 
-        file << n << "," << avgHeight << "," << avgBuildTime << endl;
+        file << n << "," << avgHeight << "," << avgBuildTime << "," << avgDestroyTime << endl;
     }
     
     file.close();
