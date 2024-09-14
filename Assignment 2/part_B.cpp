@@ -95,6 +95,10 @@ struct BinarySearchTree {
     }
 
     TreeNode* OS_Search(TreeNode* node, int i) {
+        if (node == nullptr) {
+        return nullptr;
+        }
+
         int r = (node->left ? node->left->size : 0) + 1;
         if (i == r) {
             return node;
@@ -120,7 +124,7 @@ struct BinarySearchTree {
     void InorderTreeWalk(TreeNode* node) {
         if (node != nullptr) {
             InorderTreeWalk(node->left);
-            cout << node->key << " ";
+            cout << "Key: " << node->key << ", Size: " << node->size << " | ";
             InorderTreeWalk(node->right);
         }
     }
