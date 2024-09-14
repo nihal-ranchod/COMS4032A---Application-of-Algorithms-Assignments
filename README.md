@@ -15,3 +15,5 @@ g++ measure_runtime.cpp smm_algorithms.cpp -o measure_time
 g++ correctness_check.cpp smm_algorithms.cpp -o check
 ./check
 ```
+
+### Assignment 2: [Assignment 2 PDF](./Assignment%202/Assignment2.pdf)
