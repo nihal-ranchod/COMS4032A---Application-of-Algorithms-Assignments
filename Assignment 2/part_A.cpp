@@ -134,7 +134,7 @@ int main() {
     vector<double> buildTimes;
     vector<double> destroyTimes;
 
-    int nValues[] = {10, 50, 100, 500, 1000, 5000, 10000, 50000, 100000};
+    int nValues[] = {10, 50, 100, 500, 1000, 5000, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000};
 
     ofstream file("bst_results.csv");
     file << "n,avg_height,avg_build_time,avg_destroy_time" << endl;
