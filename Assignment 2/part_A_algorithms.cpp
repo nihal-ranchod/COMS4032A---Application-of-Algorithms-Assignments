@@ -23,7 +23,7 @@ struct BinarySearchTree {
 
     BinarySearchTree() : root(nullptr) {}
 
-    void TreeInsert(int key) {
+    void treeInsert(int key) {
         TreeNode* new_node = new TreeNode(key); // Create a new node with the given key value
         TreeNode* y = nullptr; // Hold the parent node of the new node
         TreeNode* x = root; // Start from the root node
@@ -47,14 +47,14 @@ struct BinarySearchTree {
         }
     }
 
-    TreeNode* TreeMinimum(TreeNode* node) {
+    TreeNode* treeMinimum(TreeNode* node) {
         while (node->left != nullptr) {
             node = node->left;
         }
         return node;
     }
 
-    void Transplant(TreeNode* u, TreeNode* v) {
+    void transplant(TreeNode* u, TreeNode* v) {
         if (u->parent == nullptr) {
             root = v;
         } else if (u == u->parent->left) {
@@ -68,44 +68,44 @@ struct BinarySearchTree {
         }
     }
 
-    void TreeDelete(TreeNode* node) {
+    void treeDelete(TreeNode* node) {
         if (node->left == nullptr) {
-            Transplant(node, node->right);
+            transplant(node, node->right);
         } else if (node->right == nullptr) {
-            Transplant(node, node->left);
+            transplant(node, node->left);
         } else {
-            TreeNode* temp = TreeMinimum(node->right); // Successr of the node
+            TreeNode* temp = treeMinimum(node->right); // Successr of the node
             if (temp->parent != node) {
-                Transplant(temp, temp->right);
+                transplant(temp, temp->right);
                 temp->right = node->right;
                 temp->right->parent = temp;
             }
-            Transplant(node, temp);
+            transplant(node, temp);
             temp->left = node->left;
             temp->left->parent = temp;
         }
     }
 
-    void InorderTreeWalk(TreeNode* node) {
+    void inOrderTreeWalk(TreeNode* node) {
         if (node != nullptr) {
-            InorderTreeWalk(node->left);
+            inOrderTreeWalk(node->left);
             cout << node->key << " ";
-            InorderTreeWalk(node->right);
+            inOrderTreeWalk(node->right);
         }
     }
 
-    void DisplayTree() {
+    void displayTree() {
         cout << "Inorder Traversal of the Tree: ";
-        InorderTreeWalk(root);
+        inOrderTreeWalk(root);
         cout << endl;
     }
 
-    int CalculateHeight(TreeNode* node) {
+    int calculateHeight(TreeNode* node) {
         if (node == nullptr) {
             return 0;
         } else {
-            int left_height = CalculateHeight(node->left);
-            int right_height = CalculateHeight(node->right);
+            int left_height = calculateHeight(node->left);
+            int right_height = calculateHeight(node->right);
 
             if (left_height > right_height) {
                 return left_height + 1;
@@ -114,14 +114,4 @@ struct BinarySearchTree {
             }
         }
     }
-
-    // Delete all nodes of the BST are deleted and memory is deallocated
-    // TreeNode* DestroyTree(TreeNode* root) {
-    //     if (root != nullptr) {
-    //         DestroyTree(root->left);
-    //         DestroyTree(root->right);
-    //         delete root;
-    //     }
-    //     return nullptr;
-    // }
 };

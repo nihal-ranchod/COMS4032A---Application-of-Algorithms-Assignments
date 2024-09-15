@@ -40,18 +40,18 @@ int main() {
             BinarySearchTree bst;
             auto startBuild = high_resolution_clock::now();
             for (int key : keys) {
-                bst.TreeInsert(key);
+                bst.treeInsert(key);
             }
             auto stopBuild = high_resolution_clock::now();
 
             auto durationBuild = duration_cast<microseconds>(stopBuild - startBuild);
             totalBuildTime += durationBuild.count();
 
-            totalHeight += bst.CalculateHeight(bst.root);
+            totalHeight += bst.calculateHeight(bst.root);
 
             auto startDestroy = high_resolution_clock::now();
             for (int key : keys) {
-                bst.TreeDelete(bst.root);
+                bst.treeDelete(bst.root);
             }
             auto stopDestroy = high_resolution_clock::now();
 
