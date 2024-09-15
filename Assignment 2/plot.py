@@ -32,6 +32,7 @@ plt.grid(True)
 plt.savefig('Plots/bst_build_destroy_time.png')
 plt.show()
 
+
 # -------------------------------------------------------------------------------------
 # Part B Plots
 df_ost = pd.read_csv('ost_results.csv')
@@ -64,7 +65,9 @@ plt.grid(True)
 plt.savefig('Plots/ost_build_destroy_time.png')
 plt.show()
 
+
 #-------------------------------------------------------------------------------------
+# Combined Plots
 # Plot BST/OST height vs n
 plt.figure(figsize=(10, 6))
 plt.plot(bst_n_values, bst_heights, color='purple', label='BST Height')
@@ -76,7 +79,6 @@ plt.legend()
 plt.grid(True)
 plt.savefig('Plots/bst_ost_average_height.png')
 plt.show()
-
 
 # Plot BST/OST build/destroy time vs n
 plt.figure(figsize=(10, 6))
