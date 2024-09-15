@@ -51,7 +51,7 @@ int main() {
 
             auto startDestroy = high_resolution_clock::now();
             for (int key : keys) {
-                bst.TreeDelete(bst.root, key);
+                bst.TreeDelete(bst.root);
             }
             auto stopDestroy = high_resolution_clock::now();
 

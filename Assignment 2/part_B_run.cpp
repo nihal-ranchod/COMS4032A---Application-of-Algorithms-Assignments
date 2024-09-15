@@ -37,21 +37,21 @@ int main() {
             }
             random_shuffle(keys.begin(), keys.end());
 
-            BinarySearchTree bst;
+            OrderStatisticTree ost;
             auto startBuild = high_resolution_clock::now();
             for (int key : keys) {
-                bst.TreeInsert(key);
+                ost.TreeInsert(key);
             }
             auto stopBuild = high_resolution_clock::now();
 
             auto durationBuild = duration_cast<microseconds>(stopBuild - startBuild);
             totalBuildTime += durationBuild.count();
 
-            totalHeight += bst.CalculateHeight(bst.root);
+            totalHeight += ost.CalculateHeight(ost.root);
 
             auto startDestroy = high_resolution_clock::now();
             for (int key : keys) {
-                bst.TreeDelete(bst.root, key);
+                ost.TreeDelete(ost.root);
             }
             auto stopDestroy = high_resolution_clock::now();
 

@@ -7,19 +7,19 @@
 using namespace std;
 
 int main() {
-    BinarySearchTree bst;
+    OrderStatisticTree ost;
 
     // Insert values into the tree
     vector<int> values = {5, 3, 7, 2, 4, 6, 8};
     for (int value : values) {
-        bst.TreeInsert(value);
+        ost.TreeInsert(value);
     }
 
     // Display the tree
-    bst.DisplayTree();
+    ost.DisplayTree();
 
     // Search for the 3rd smallest element
-    TreeNode* node = bst.OS_Search(bst.root, 3);
+    TreeNode* node = ost.OS_Search(ost.root, 3);
     if (node != nullptr) {
         cout << "3rd smallest element: " << node->key << endl;
     } else {
@@ -27,19 +27,19 @@ int main() {
     }
 
     // Get the rank of a node
-    int rank = bst.OS_Rank(node);
+    int rank = ost.OS_Rank(node);
     cout << "Rank of node with key " << node->key << ": " << rank << endl;
 
     // Delete a node
     cout << "Delete node with key " << node->key << ": " << endl;
-    bst.TreeDelete(node, node->key);
-    bst.DisplayTree();
+    ost.TreeDelete(node);
+    ost.DisplayTree();
 
     // Insert another key after delete
     int newKey = 10;
-    bst.TreeInsert(newKey);
+    ost.TreeInsert(newKey);
     cout << "Inserted key " << newKey << " after deletion." << endl;
-    bst.DisplayTree();
+    ost.DisplayTree();
 
     return 0;
 }

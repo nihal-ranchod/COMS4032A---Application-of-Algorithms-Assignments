@@ -19,10 +19,10 @@ struct TreeNode {
     TreeNode(int value) : key(value), size(1), left(nullptr), right(nullptr), parent(nullptr) {}
 };
 
-struct BinarySearchTree {
+struct OrderStatisticTree {
     TreeNode* root;
 
-    BinarySearchTree() : root(nullptr) {}
+    OrderStatisticTree() : root(nullptr) {}
 
     void TreeInsert(int key) {
         TreeNode* new_node = new TreeNode(key);
@@ -63,7 +63,7 @@ struct BinarySearchTree {
         }
     }
 
-    void TreeDelete(TreeNode* node, int key) {
+    void TreeDelete(TreeNode* node) {
         TreeNode* y = node;
         while (y != nullptr) {
             y->size--; // Decrement size of the subtree

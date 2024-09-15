@@ -68,7 +68,7 @@ struct BinarySearchTree {
         }
     }
 
-    void TreeDelete(TreeNode* node, int key) {
+    void TreeDelete(TreeNode* node) {
         if (node->left == nullptr) {
             Transplant(node, node->right);
         } else if (node->right == nullptr) {
