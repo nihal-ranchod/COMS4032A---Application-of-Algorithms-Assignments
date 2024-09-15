@@ -31,7 +31,8 @@ int main() {
     cout << "Rank of node with key " << node->key << ": " << rank << endl;
 
     // Delete a node
-    bst.TreeDelete(node);
+    cout << "Delete node with key " << node->key << ": " << endl;
+    bst.TreeDelete(node, node->key);
     bst.DisplayTree();
 
     // Insert another key after delete

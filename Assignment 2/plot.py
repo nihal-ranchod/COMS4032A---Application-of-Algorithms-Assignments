@@ -42,6 +42,16 @@ ost_heights = df_ost['avg_height']
 ost_build_times = df_ost['avg_build_time']
 ost_destroy_times = df_ost['avg_destroy_time']
 
+# Plot height vs n 
+plt.figure(figsize=(10, 6))
+plt.plot(ost_n_values, ost_heights, color='lightseagreen')
+plt.xlabel('Number of Keys (n)')
+plt.ylabel('Average Height')
+plt.title('Average Height of OST')
+plt.grid(True) 
+plt.savefig('Plots/ost_average_height.png')
+plt.show()
+
 # Plot build/destroy time vs n 
 plt.figure(figsize=(10, 6))
 plt.plot(ost_n_values, ost_build_times, color = 'purple', label='Average Build Time')
@@ -55,7 +65,20 @@ plt.savefig('Plots/ost_build_destroy_time.png')
 plt.show()
 
 #-------------------------------------------------------------------------------------
-# Plot BST build/destroy time vs n
+# Plot BST/OST height vs n
+plt.figure(figsize=(10, 6))
+plt.plot(bst_n_values, bst_heights, color='purple', label='BST Height')
+plt.plot(ost_n_values, ost_heights, color='blue', label='OST Height')
+plt.xlabel('Number of Keys (n)')
+plt.ylabel('Average Height')
+plt.title('Average Height of BST vs. OST')
+plt.legend()
+plt.grid(True)
+plt.savefig('Plots/bst_ost_average_height.png')
+plt.show()
+
+
+# Plot BST/OST build/destroy time vs n
 plt.figure(figsize=(10, 6))
 plt.plot(bst_n_values, bst_build_times, color='purple', label='BST Build Time')
 plt.plot(bst_n_values, bst_destroy_times, color='darkcyan', label='BST Destroy Time')
@@ -66,7 +89,7 @@ plt.plot(ost_n_values, ost_destroy_times, color='red', label='OST Destroy Time')
 
 plt.xlabel('Number of Keys (n)')
 plt.ylabel('Time (microseconds)')
-plt.title('Average Time to Build and Destroy BST and OST')
+plt.title('Average Time to Build and Destroy BST vs. OST')
 plt.legend()
 plt.grid(True)
 plt.savefig('Plots/bst_ost_build_destroy_time.png')
