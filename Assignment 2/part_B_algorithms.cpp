@@ -24,32 +24,32 @@ struct OrderStatisticTree {
 
     OrderStatisticTree() : root(nullptr) {}
 
-    void TreeInsert(int key) {
-        TreeNode* new_node = new TreeNode(key);
+    void treeInsert(int key) {
+        TreeNode* z = new TreeNode(key);
         TreeNode* y = nullptr;
         TreeNode* x = root;
 
         while (x != nullptr) {
             y = x;
-            x->size++; // Increment size of the subtree
-            if (new_node->key < x->key) {
+            x->size++; // Increment size of subtree
+            if (z->key < x->key) {
                 x = x->left;
             } else {
                 x = x->right;
             }
         }
 
-        new_node->parent = y;
+        z->parent = y;
         if (y == nullptr) {
-            root = new_node;
-        } else if (new_node->key < y->key) {
-            y->left = new_node;
+            root = z;
+        } else if (z->key < y->key) {
+            y->left = z;
         } else {
-            y->right = new_node;
+            y->right = z;
         }
     }
 
-    void Transplant(TreeNode* u, TreeNode* v) {
+    void transplant(TreeNode* u, TreeNode* v) {
         if (u->parent == nullptr) {
             root = v;
         } else if (u == u->parent->left) {
@@ -57,48 +57,70 @@ struct OrderStatisticTree {
         } else {
             u->parent->right = v;
         }
-
         if (v != nullptr) {
             v->parent = u->parent;
         }
     }
 
-    void TreeDelete(TreeNode* node) {
-        TreeNode* y = node;
-        while (y != nullptr) {
-            y->size--; // Decrement size of the subtree
-            y = y->parent;
+    TreeNode* treeMinimum(TreeNode* x) {
+        while (x->left != nullptr) {
+            x = x->left;
         }
+        return x;
+    }
 
-        if (node->left == nullptr) {
-            Transplant(node, node->right);
-        } else if (node->right == nullptr) {
-            Transplant(node, node->left);
-        } else {
-            TreeNode* temp = TreeMinimum(node->right);
-            if (temp->parent != node) {
-                Transplant(temp, temp->right);
-                temp->right = node->right;
-                temp->right->parent = temp;
+    void updateSize(TreeNode* node) {
+        while (node != nullptr) {
+            int newSize = 1;  // Initialize with 1 to count the node itself
+            if (node->left != nullptr) {
+                newSize += node->left->size;
             }
-            Transplant(node, temp);
-            temp->left = node->left;
-            temp->left->parent = temp;
+            if (node->right != nullptr) {
+                newSize += node->right->size;
+            }
+
+            // Only update if the size actually changes
+            if (newSize == node->size) {
+                break;  // No further updates needed if size hasn't changed
+            }
+
+            node->size = newSize;  // Update the size of the current node
+            node = node->parent;   // Move up to the parent
         }
     }
 
-    TreeNode* TreeMinimum(TreeNode* node) {
-        while (node->left != nullptr) {
-            node = node->left;
+    void treeDelete(TreeNode* z) {
+        TreeNode* affectedNode = nullptr;
+
+        if (z->left == nullptr) {
+            transplant(z, z->right);
+            affectedNode = z->parent;  // The parent of the deleted node is affected
+        } else if (z->right == nullptr) {
+            transplant(z, z->left);
+            affectedNode = z->parent;  // The parent of the deleted node is affected
+        } else {
+            TreeNode* y = treeMinimum(z->right);  // Find the successor (minimum in right subtree)
+            affectedNode = y->parent != z ? y->parent : y;  // Find the affected node for size updates
+
+            if (y->parent != z) {
+                transplant(y, y->right);
+                y->right = z->right;
+                y->right->parent = y;
+            }
+            transplant(z, y);
+            y->left = z->left;
+            y->left->parent = y;
         }
-        return node;
+
+        delete z;
+
+        // Update the sizes starting from the affected node (successor or parent of z)
+        if (affectedNode != nullptr) {
+            updateSize(affectedNode);
+        }
     }
 
     TreeNode* OS_Search(TreeNode* node, int i) {
-        if (node == nullptr) {
-        return nullptr;
-        }
-
         int r = (node->left ? node->left->size : 0) + 1;
         if (i == r) {
             return node;
@@ -121,26 +143,26 @@ struct OrderStatisticTree {
         return r;
     }
 
-    void InorderTreeWalk(TreeNode* node) {
+    void inorderTreeWalk(TreeNode* node) {
         if (node != nullptr) {
-            InorderTreeWalk(node->left);
+            inorderTreeWalk(node->left);
             cout << "Key: " << node->key << ", Size: " << node->size << " | ";
-            InorderTreeWalk(node->right);
+            inorderTreeWalk(node->right);
         }
     }
 
-    void DisplayTree() {
+    void displayTree() {
         cout << "Inorder Traversal of the Tree: ";
-        InorderTreeWalk(root);
+        inorderTreeWalk(root);
         cout << endl;
     }
 
-    int CalculateHeight(TreeNode* node) {
+    int calculateHeight(TreeNode* node) {
         if (node == nullptr) {
             return 0;
         } else {
-            int left_height = CalculateHeight(node->left);
-            int right_height = CalculateHeight(node->right);
+            int left_height = calculateHeight(node->left);
+            int right_height = calculateHeight(node->right);
 
             if (left_height > right_height) {
                 return left_height + 1;

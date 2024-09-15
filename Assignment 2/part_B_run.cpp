@@ -40,18 +40,18 @@ int main() {
             OrderStatisticTree ost;
             auto startBuild = high_resolution_clock::now();
             for (int key : keys) {
-                ost.TreeInsert(key);
+                ost.treeInsert(key);
             }
             auto stopBuild = high_resolution_clock::now();
 
             auto durationBuild = duration_cast<microseconds>(stopBuild - startBuild);
             totalBuildTime += durationBuild.count();
 
-            totalHeight += ost.CalculateHeight(ost.root);
+            totalHeight += ost.calculateHeight(ost.root);
 
             auto startDestroy = high_resolution_clock::now();
             for (int key : keys) {
-                ost.TreeDelete(ost.root);
+                ost.treeDelete(ost.root);
             }
             auto stopDestroy = high_resolution_clock::now();
 
