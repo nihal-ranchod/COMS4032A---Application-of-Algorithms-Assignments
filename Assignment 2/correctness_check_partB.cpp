@@ -2,7 +2,7 @@
 #include <vector>
 #include <algorithm>
 #include <cassert>
-#include "part_B.cpp"
+#include "part_B_algorithms.cpp"
 
 using namespace std;
 

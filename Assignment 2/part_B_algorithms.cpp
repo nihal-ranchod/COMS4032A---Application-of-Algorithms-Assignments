@@ -63,7 +63,7 @@ struct BinarySearchTree {
         }
     }
 
-    void TreeDelete(TreeNode* node) {
+    void TreeDelete(TreeNode* node, int key) {
         TreeNode* y = node;
         while (y != nullptr) {
             y->size--; // Decrement size of the subtree
@@ -133,5 +133,20 @@ struct BinarySearchTree {
         cout << "Inorder Traversal of the Tree: ";
         InorderTreeWalk(root);
         cout << endl;
+    }
+
+    int CalculateHeight(TreeNode* node) {
+        if (node == nullptr) {
+            return 0;
+        } else {
+            int left_height = CalculateHeight(node->left);
+            int right_height = CalculateHeight(node->right);
+
+            if (left_height > right_height) {
+                return left_height + 1;
+            } else {
+                return right_height + 1;
+            }
+        }
     }
 };
