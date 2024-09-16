@@ -10,37 +10,35 @@ int main() {
     OrderStatisticTree ost;
 
     // Insert values into the tree
-    vector<int> values = {5, 3, 7, 2, 4, 6, 8};
+    vector<int> values = {10, 5, 15, 3, 7, 12, 18, 1, 4, 6, 8};
     for (int value : values) {
         ost.treeInsert(value);
     }
 
     // Display the tree
     ost.displayTree();
+    cout << endl;
 
-    // Search for the 3rd smallest element
-    TreeNode* node = ost.OS_Search(ost.root, 3);
-    if (node != nullptr) {
-        cout << "3rd smallest element: " << node->key << endl;
-    } else {
-        cout << "Element not found" << endl;
-    }
-
-    // Get the rank of a node
-    int rank = ost.OS_Rank(node);
-    cout << "Rank of node with key " << node->key << ": " << rank << endl;
-
-    // Delete a node
-    cout << "Delete root " << node->key << ": " << endl;
-    ost.treeDelete(node);
+    // Insert new node: 13
+    int key = 13;
+    ost.treeInsert(key);
+    cout << "Inserted key " << key << endl;
     ost.displayTree();
-    cout << "New root " << ost.root->key << endl;
+      cout << endl;
 
-    // Insert another key after delete
-    int newKey = 10;
-    ost.treeInsert(newKey);
-    cout << "Inserted key " << newKey << " after deletion." << endl;
+    // Delete root: 10
+    ost.treeDelete(ost.root);
+    cout << "Deleted root 10" << endl;
     ost.displayTree();
+    cout << "New root: " << ost.root->key << endl;
+    cout << endl;
+
+    // Delete node: 5
+    TreeNode* node5 = ost.root->left; // assuming that node 5 was the left child of root
+    cout << "Delete node " << node5->key << ": " << endl;
+    ost.treeDelete(node5);
+    ost.displayTree();
+    cout << "New left child of root: " << ost.root->left->key << endl;
 
     return 0;
 }
