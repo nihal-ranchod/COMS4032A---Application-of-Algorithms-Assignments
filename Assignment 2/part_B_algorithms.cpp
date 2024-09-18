@@ -120,14 +120,14 @@ struct OrderStatisticTree {
         }
     }
 
-    TreeNode* OS_Search(TreeNode* node, int i) {
+    TreeNode* OS_Select(TreeNode* node, int i) {
         int r = (node->left ? node->left->size : 0) + 1;
         if (i == r) {
             return node;
         } else if (i < r) {
-            return OS_Search(node->left, i);
+            return OS_Select(node->left, i);
         } else {
-            return OS_Search(node->right, i - r);
+            return OS_Select(node->right, i - r);
         }
     }
 
