@@ -33,3 +33,5 @@ To run the correctness check for part B:
 g++ correctness_check_partB.cpp -o checkB
 ./checkB
 ```
+
+### Assignment 3: [Assignment 3 PDF](./Assignment%203/Assignment3.pdf)
