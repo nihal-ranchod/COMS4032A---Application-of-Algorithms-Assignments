@@ -113,6 +113,9 @@ int main() {
             run_experiment(n, m, file);
         }
     }
+    // for (int i = 0; i < 9; i++) {
+    //     run_experiment(num_elements[i], num_operations[i], file);
+    // }
 
     file.close();
     cout << "Experiment completed. Results saved to part_A_1_expanded.csv" << endl;
