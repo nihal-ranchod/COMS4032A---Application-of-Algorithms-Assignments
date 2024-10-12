@@ -8,11 +8,10 @@ print(dataA1)
 
 # Execution Time vs. Number of Operations for Fixed Number of Elements
 plt.figure(figsize=(10, 6))
-sns.lineplot(x=dataA1['Number of operations'], y=dataA1['Execution time'], marker='o')
+sns.lineplot(x=dataA1['Number of operations'], y=dataA1['Execution time'], color='green')
 plt.title('Execution Time vs Number of Operations for Fixed Number of Elements (n = 1000) PART A-1')
 plt.xlabel('Number of Operations (m)')
 plt.ylabel('Execution Time (seconds)')
-plt.yscale('log')
 plt.grid(True)
 
 plt.savefig('Assignment 3/Graphs/part_A_1.png')
@@ -25,11 +24,10 @@ print(dataA2)
 
 # Execution Time vs. Number of Operations for Fixed Number of Elements
 plt.figure(figsize=(10, 6))
-sns.lineplot(x=dataA2['Number of operations'], y=dataA2['Execution time'], marker='o')
+sns.lineplot(x=dataA2['Number of operations'], y=dataA2['Execution time'], color='purple')
 plt.title('Execution Time vs Number of Operations for Fixed Number of Elements (n = 1000) PART A-2')
 plt.xlabel('Number of Operations (m)')
 plt.ylabel('Execution Time (seconds)')
-plt.yscale('log')
 plt.grid(True)
 
 plt.savefig('Assignment 3/Graphs/part_A_2.png')
@@ -38,12 +36,11 @@ plt.show()
 
 # Combined Plot
 plt.figure(figsize=(10, 6))
-sns.lineplot(x=dataA1['Number of operations'], y=dataA1['Execution time'], marker='o', label='Part A-1')
-sns.lineplot(x=dataA2['Number of operations'], y=dataA2['Execution time'], marker='o', label='Part A-2')
+sns.lineplot(x=dataA1['Number of operations'], y=dataA1['Execution time'], label='Part A-1', color='green')
+sns.lineplot(x=dataA2['Number of operations'], y=dataA2['Execution time'], label='Part A-2', color='purple')
 plt.title('Execution Time vs Number of Operations for Fixed Number of Elements (n = 1000)')
 plt.xlabel('Number of Operations (m)')
 plt.ylabel('Execution Time (seconds)')
-plt.yscale('log')
 plt.grid(True)
 plt.legend()
 
