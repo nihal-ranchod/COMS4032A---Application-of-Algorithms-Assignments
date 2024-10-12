@@ -102,8 +102,9 @@ void run_experiment(int n, int m, ofstream &file) {
 }
 
 int main() {
-    int num_elements[] = {1000, 5000, 10000, 50000, 100000, 500000, 1000000};
-    int num_operations[] = {1000, 5000, 10000, 50000, 100000, 500000, 1000000};
+    // int num_elements[] = {1000, 5000, 10000, 50000, 100000, 500000, 1000000};
+    int num_elements[] = {1000};
+    int num_operations[] = {1000, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000};
 
     ofstream file("part_A_1.csv");
     file << "Number of elements,Number of operations,Execution time,Consistency Check" << endl;

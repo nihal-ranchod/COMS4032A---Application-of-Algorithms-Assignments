@@ -9,10 +9,11 @@ using namespace std;
 
 class Element {
 public:
-    int p;     
-    int rank;  
+    int p;     // Parent of the element
+    int rank;  // Rank for union by rank
+    Element* next; // Next member in the set linked list
 
-    Element() : p(0), rank(0) {}
+    Element() : p(0), rank(0), next(nullptr) {}
 };
 
 class DisjointSet {
@@ -25,6 +26,7 @@ public:
         for (int i = 0; i < n; i++) {
             elements[i].p = i; // Initialize each element to be its own parent
             elements[i].rank = 0; // Initialize rank
+            elements[i].next = &elements[i]; // Next points to itself initially
         }
     }
 
@@ -32,6 +34,7 @@ public:
     void MAKE_SET(int x) {
         elements[x].p = x;
         elements[x].rank = 0; // Initialize rank
+        elements[x].next = &elements[x]; // Point next to itself
     }
 
     // Find-Set Operation with path compression: Returns the representative of the set that contains x.
@@ -57,6 +60,26 @@ public:
     // Union Operation: Combines the two sets that contain x and y.
     void UNION(int x, int y) {
         LINK(FIND_SET(x), FIND_SET(y));
+    }
+
+    // PRINT-SET Operation: Prints all members of the set containing x.
+    void PRINT_SET(int x) {
+        int root = FIND_SET(x);
+        Element* current = &elements[root];
+        std::vector<int> members;
+
+        // Traverse through the members using the next pointers
+        do {
+            members.push_back(current->p); // Store the member's index
+            current = current->next; // Move to the next member
+        } while (current != &elements[root]); // Stop when we circle back to the root
+
+        // Print the members
+        std::cout << "Members of the set containing " << x << ": ";
+        for (int member : members) {
+            std::cout << member << " "; // Print each member
+        }
+        std::cout << std::endl;
     }
 
     // Check consistency of the Disjoint Set structure
@@ -96,24 +119,29 @@ void run_experiment(int n, int m, ofstream &file) {
     auto end = chrono::high_resolution_clock::now();
     chrono::duration<double> elapsed_time = end - start;
 
+    // Measure the execution time for PRINT-SET
+    start = chrono::high_resolution_clock::now();
+    ds.PRINT_SET(rand() % n); // Print the set of a random element
+    end = chrono::high_resolution_clock::now();
+    chrono::duration<double> print_elapsed_time = end - start;
+
     // Check consistency after operations
     bool is_consistent = ds.check_consistency(n);
 
     // Save results to file
     if (is_consistent) {
-        file << n << "," << m << "," << elapsed_time.count() << ",Consistent" << endl;
+        file << n << "," << m << "," << elapsed_time.count() << "," << print_elapsed_time.count() << ",Consistent" << endl;
     } else {
-        file << n << "," << m << "," << elapsed_time.count() << ",Inconsistent" << endl;
+        file << n << "," << m << "," << elapsed_time.count() << "," << print_elapsed_time.count() << ",Inconsistent" << endl;
     }
 }
 
 int main() {
-    // int num_elements[] = {1000, 5000, 10000, 50000, 100000, 500000, 1000000};
-    int num_elements[] = {1000};
+    int num_elements[] = {1000, 5000, 10000, 50000, 100000, 500000, 1000000};
     int num_operations[] = {1000, 5000, 10000, 50000, 100000, 500000, 1000000};
 
-    ofstream file("part_A_2.csv");
-    file << "Number of elements,Number of operations,Execution time,Consistency Check" << endl;
+    ofstream file("part_B.csv");
+    file << "Number of elements,Number of operations,Execution time,PRINT-SET time,Consistency Check" << endl;
 
     // Run the experiment for all combinations of num_elements and num_operations
     for (int n : num_elements) {
@@ -125,6 +153,6 @@ int main() {
     }
 
     file.close();
-    cout << "Experiment completed. Results saved to part_A_2.csv" << endl;
+    cout << "Experiment completed. Results saved to part_B.csv" << endl;
     return 0;
 }
