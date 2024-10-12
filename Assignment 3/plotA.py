@@ -3,8 +3,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Part A-1
-
-# Load your CSV results
 dataA1 = pd.read_csv('Assignment 3/part_A_1.csv')
 print(dataA1)
 

@@ -1,8 +1,10 @@
 Number of elements,Number of operations,Execution time,Consistency Check
-1000,1000,4.1e-06,Consistent
-1000,5000,0.0002136,Consistent
-1000,10000,0.0004032,Consistent
-1000,50000,0.0019478,Consistent
-1000,100000,0.0039187,Consistent
-1000,500000,0.0202084,Consistent
-1000,1000000,0.0438613,Consistent
+1000,1000,4.4e-06,Consistent
+1000,5000,0.0001951,Consistent
+1000,10000,0.0003837,Consistent
+1000,25000,0.0010295,Consistent
+1000,50000,0.002193,Consistent
+1000,100000,0.0038775,Consistent
+1000,250000,0.0105155,Consistent
+1000,500000,0.0229065,Consistent
+1000,1000000,0.048458,Consistent
