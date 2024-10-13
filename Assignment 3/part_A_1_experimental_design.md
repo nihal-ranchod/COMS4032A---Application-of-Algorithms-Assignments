@@ -1,6 +1,3 @@
-Here’s a revised version of the **Implementation Details for Disjoint Set Experiment**, reflecting the updates made in your implementation:
-
----
 
 ## Implementation Details for Disjoint Set Experiment
 
@@ -16,9 +13,9 @@ The purpose of this experiment is to evaluate the performance of Disjoint Set op
 
 2. **Implementation of Operations**:
    - The operations are encapsulated in a class called `DisjointSet`, which includes:
-     - **Make-Set**: Initializes a single set for each element.
-     - **Find-Set**: Returns the representative of the set that contains a specified element.
-     - **Union**: Merges two sets based on their sizes using the weighted-union heuristic to ensure efficient operations.
+     - **MAKE_SET**: Initializes a single set for each element.
+     - **FIND_SET**: Returns the representative of the set that contains a specified element.
+     - **UNION**: Merges two sets based on their sizes using the weighted-union heuristic to ensure efficient operations.
 
 ### Weighted-Union Heuristic
 
@@ -27,14 +24,16 @@ The purpose of this experiment is to evaluate the performance of Disjoint Set op
    - This is accomplished by comparing the sizes of the two sets and making the root of the smaller set point to the root of the larger set.
 
 2. **Implementation**:
-   - The **Union** function employs the following logic:
+   - The **UNION** function employs the following logic:
      ```cpp
      if (size[root_x] < size[root_y]) {
          parent[root_x] = root_y; // Attach smaller set (root_x) to larger set (root_y)
          size[root_y] += size[root_x]; // Update the size of the new root
+         depth[root_y] = max(depth[root_y], depth[root_x] + 1);
      } else {
          parent[root_y] = root_x; // Attach smaller set (root_y) to larger set (root_x)
          size[root_x] += size[root_y]; // Update the size of the new root
+         depth[root_x] = max(depth[root_x], depth[root_y] + 1);
      }
      ```
    - This approach guarantees that each union operation is efficient and minimizes future search times.
@@ -42,11 +41,11 @@ The purpose of this experiment is to evaluate the performance of Disjoint Set op
 ### Consistency Check
 
 1. **Purpose**:
-   - To ensure the Disjoint Set implementation operates correctly after a series of **Make-Set** and **Union** operations, a consistency check is performed.
+   - To ensure the Disjoint Set implementation operates correctly after a series of **MAKE_SET** and **UNION** operations, a consistency check is performed.
    - This check verifies that each element points to the correct representative of its set, maintaining the integrity of the data structure.
 
 2. **Implementation**:
-   - The **check_consistency** function iterates through all elements, asserting that the representative returned by **Find-Set** for each element matches the representative returned for its representative:
+   - The **check_consistency** function iterates through all elements, asserting that the representative returned by **FIND_SET** for each element matches the representative returned for its representative:
      ```cpp
      bool check_consistency(int n) {
          for (int i = 0; i < n; ++i) {
@@ -68,15 +67,18 @@ The purpose of this experiment is to evaluate the performance of Disjoint Set op
 2. **Selecting Elements for UNION Operations**:
    - For each UNION operation, two elements are randomly selected from the range of indices using:
      ```cpp
-     ds.UNION(rand() % n, rand() % n);
+     uniform_int_distribution<> dist(0, n - 1);
+     int x = dist(gen);
+     int y = dist(gen);
+     ds.UNION(x, y);
      ```
-   - This line generates two random integers in the range `[0, n-1]`, ensuring that the selected elements are valid indices in the Disjoint Set. The randomness allows the experiment to simulate a realistic usage scenario.
+   - This approach ensures that the selected elements are valid indices in the Disjoint Set, allowing the experiment to simulate realistic usage scenarios.
 
 3. **Choice of Ranges for Elements and Operations**:
    - The ranges for the number of elements (`n`) and the number of operations (`m`) are chosen to cover a wide spectrum of potential use cases, reflecting small to very large datasets. The following arrays are used:
      ```cpp
-     int num_elements[] = {1000, 5000, 10000, 50000, 100000, 500000, 1000000, 5000000, 10000000};
-     int num_operations[] = {1000, 5000, 10000, 50000, 100000, 500000, 1000000, 5000000, 10000000};
+     int num_elements[] = {1000, 5000, 10000};
+     int num_operations[] = {1000, 5000, 10000, 25000, 50000};
      ```
    - Each element of `num_elements` corresponds to an entry in `num_operations`, allowing for the evaluation of the Disjoint Set operations with varying ratios of operations to elements.
 
@@ -95,7 +97,3 @@ The purpose of this experiment is to evaluate the performance of Disjoint Set op
 This experiment is designed to comprehensively assess the performance of Disjoint Set operations under various conditions, explicitly utilizing the weighted-union heuristic to optimize the union process. By varying the number of elements and operations while randomly selecting elements for union operations, the experiment captures the behavior of the algorithm in a realistic scenario. The data collected will facilitate the analysis of time complexity, supporting the theoretical claims made in Theorem 21.2.
 
 The results will contribute to understanding how the performance of the Disjoint Set structure scales with increasing input sizes and operation counts.
-
---- 
-
-Feel free to modify any specific sections to align more closely with your implementation or any additional requirements you may have!
