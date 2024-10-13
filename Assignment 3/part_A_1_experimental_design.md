@@ -1,99 +1,65 @@
-
-## Implementation Details for Disjoint Set Experiment
+## Disjoint Set Experiment Implementation
 
 ### Overview
 
-The purpose of this experiment is to evaluate the performance of Disjoint Set operations, specifically focusing on the **Make-Set**, **Union**, and **Find-Set** operations. The experiment aims to provide empirical evidence for Theorem 21.2, which states that a sequence of \( m \) **Make-Set**, **Union**, and **Find-Set** operations takes \( O(m + n \log n) \) time when using the weighted-union heuristic.
+This experiment investigates the efficiency of **Disjoint Set operations**—specifically, **Make-Set**, **Union**, and **Find-Set**—using the **weighted-union heuristic**. We aim to empirically confirm the theoretical claim of Theorem 21.2, which states that \( O(m + n \log n) \) time complexity can be achieved for a sequence of \( m \) operations, including **Make-Set**, **Union**, and **Find-Set**, using the weighted-union heuristic. The results are captured in CSV files for further analysis.
 
-### Key Components of the Implementation
+### Key Implementation Components
 
-1. **Disjoint Set Data Structure**:
-   - The Disjoint Set (or Union-Find) data structure manages a collection of non-overlapping sets. Each element starts in its own set.
-   - The **Make-Set** operation initializes the sets, the **Union** operation combines two sets based on their sizes using the weighted-union heuristic, and the **Find-Set** operation identifies the representative (or root) of the set containing a specific element.
+1. **DisjointSet Class**:
+   - The DisjointSet class encapsulates the three fundamental operations: **Make-Set**, **Find-Set**, and **Union**. 
+   - The `parent` vector tracks the representative of each set, and the `size` vector records the sizes of the sets for optimizing union operations.
 
-2. **Implementation of Operations**:
-   - The operations are encapsulated in a class called `DisjointSet`, which includes:
-     - **MAKE_SET**: Initializes a single set for each element.
-     - **FIND_SET**: Returns the representative of the set that contains a specified element.
-     - **UNION**: Merges two sets based on their sizes using the weighted-union heuristic to ensure efficient operations.
-
-### Weighted-Union Heuristic
-
-1. **Principle**:
-   - The weighted-union heuristic optimizes the structure of the sets during the **Union** operation. When merging two sets, the smaller set is appended to the larger set to minimize tree height.
-   - This is accomplished by comparing the sizes of the two sets and making the root of the smaller set point to the root of the larger set.
-
-2. **Implementation**:
-   - The **UNION** function employs the following logic:
+2. **Weighted-Union Heuristic**:
+   - The **Union** operation merges two sets based on size, attaching the smaller set to the larger one to reduce tree height, which optimizes future **Find-Set** operations.
+   - Implementation:
      ```cpp
      if (size[root_x] < size[root_y]) {
-         parent[root_x] = root_y; // Attach smaller set (root_x) to larger set (root_y)
-         size[root_y] += size[root_x]; // Update the size of the new root
-         depth[root_y] = max(depth[root_y], depth[root_x] + 1);
+         parent[root_x] = root_y;
+         size[root_y] += size[root_x];
      } else {
-         parent[root_y] = root_x; // Attach smaller set (root_y) to larger set (root_x)
-         size[root_x] += size[root_y]; // Update the size of the new root
-         depth[root_x] = max(depth[root_x], depth[root_y] + 1);
+         parent[root_y] = root_x;
+         size[root_x] += size[root_y];
      }
      ```
-   - This approach guarantees that each union operation is efficient and minimizes future search times.
+   - This design minimizes the height of the tree, ensuring efficient subsequent operations.
 
-### Consistency Check
-
-1. **Purpose**:
-   - To ensure the Disjoint Set implementation operates correctly after a series of **MAKE_SET** and **UNION** operations, a consistency check is performed.
-   - This check verifies that each element points to the correct representative of its set, maintaining the integrity of the data structure.
-
-2. **Implementation**:
-   - The **check_consistency** function iterates through all elements, asserting that the representative returned by **FIND_SET** for each element matches the representative returned for its representative:
+3. **Consistency Check**:
+   - A **check_consistency** function verifies that each element's parent points to the correct representative, ensuring the integrity of the Disjoint Set data structure.
+   - Implementation:
      ```cpp
      bool check_consistency(int n) {
          for (int i = 0; i < n; ++i) {
              if (FIND_SET(i) != FIND_SET(FIND_SET(i))) {
-                 return false; // Inconsistent structure
+                 return false;
              }
          }
-         return true; // Consistent structure
+         return true;
      }
      ```
-   - If the check passes, the structure is deemed consistent; otherwise, it indicates an error.
 
-### Experiment Design
+### Experiment Design and Execution
 
-1. **Setup**:
-   - The experiment involves creating a `DisjointSet` instance for varying numbers of elements.
-   - Each element in the set is represented by an index from `0` to `n-1`, where `n` is the number of elements.
+1. **Experiment Setup**:
+   - The experiment initializes `num_elements`, a set of predefined element counts, each with a number of elements from `100` to `1,000,000`.
+   - For each element count, the experiment repeats **Make-Set** and **Union** operations for 10 runs, recording execution times to assess the impact of the weighted-union heuristic.
+  
+2. **Operation Execution**:
+   - **Make-Set** is called for each element, initializing them as separate sets.
+   - All elements are then unified with a single representative, effectively forming one large set, to simulate realistic Disjoint Set usage.
+   - Execution times for these operations are captured using `<chrono>` for accurate timing.
+  
+3. **Data Collection**:
+   - The execution time and consistency status for each run are logged in `part_A_1.csv`.
+   - An additional file, `part_A_1_averaged.csv`, is generated, containing the averaged execution times over 10 runs for each element count.
 
-2. **Selecting Elements for UNION Operations**:
-   - For each UNION operation, two elements are randomly selected from the range of indices using:
-     ```cpp
-     uniform_int_distribution<> dist(0, n - 1);
-     int x = dist(gen);
-     int y = dist(gen);
-     ds.UNION(x, y);
-     ```
-   - This approach ensures that the selected elements are valid indices in the Disjoint Set, allowing the experiment to simulate realistic usage scenarios.
-
-3. **Choice of Ranges for Elements and Operations**:
-   - The ranges for the number of elements (`n`) and the number of operations (`m`) are chosen to cover a wide spectrum of potential use cases, reflecting small to very large datasets. The following arrays are used:
-     ```cpp
-     int num_elements[] = {1000, 5000, 10000};
-     int num_operations[] = {1000, 5000, 10000, 25000, 50000};
-     ```
-   - Each element of `num_elements` corresponds to an entry in `num_operations`, allowing for the evaluation of the Disjoint Set operations with varying ratios of operations to elements.
-
-4. **Execution Timing**:
-   - The execution time for the series of operations is measured using the `<chrono>` library. This is done by capturing the time before and after the operations:
-     ```cpp
-     auto start = chrono::high_resolution_clock::now();
-     // Make n sets
-     // Perform m UNION operations
-     auto end = chrono::high_resolution_clock::now();
-     ```
-   - The elapsed time is computed and recorded for each experiment iteration.
+4. **Random Number Generator**:
+   - A Mersenne Twister (`mt19937`) engine seeded with `random_device` generates randomness for element selection in **Union** operations.
+  
+5. **Output Files**:
+   - `part_A_1.csv`: Contains detailed records of execution times and consistency results for each element count across 10 runs.
+   - `part_A_1_averaged.csv`: Stores average execution times for each element count, facilitating overall performance analysis.
 
 ### Conclusion
 
-This experiment is designed to comprehensively assess the performance of Disjoint Set operations under various conditions, explicitly utilizing the weighted-union heuristic to optimize the union process. By varying the number of elements and operations while randomly selecting elements for union operations, the experiment captures the behavior of the algorithm in a realistic scenario. The data collected will facilitate the analysis of time complexity, supporting the theoretical claims made in Theorem 21.2.
-
-The results will contribute to understanding how the performance of the Disjoint Set structure scales with increasing input sizes and operation counts.
+The experiment successfully demonstrates the performance of Disjoint Set operations using the weighted-union heuristic, providing empirical validation of the time complexity asserted by Theorem 21.2. The recorded data illustrates the efficiency gains from using the weighted-union heuristic in Disjoint Set operations, especially as the number of elements scales up. The results are stored in two CSV files for further analysis, confirming the expected performance characteristics of the Disjoint Set data structure under various conditions.

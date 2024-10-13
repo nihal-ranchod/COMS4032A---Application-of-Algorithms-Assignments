@@ -9,8 +9,6 @@ takes 𝑂(𝑚 + 𝑛log 𝑛) time.
 #include <vector>
 #include <chrono>
 #include <fstream>
-#include <cstdlib>  // For rand()
-#include <random>   // For different distributions
 #include <map>
 #include <tuple>
 #include <algorithm> // For std::max
@@ -21,19 +19,16 @@ class DisjointSet {
 private:
     vector<int> parent;
     vector<int> size;
-    vector<int> depth;
 
 public:
     DisjointSet(int n) {
         parent.resize(n);
         size.resize(n, 1);
-        depth.resize(n, 1);
     }
 
     void MAKE_SET(int x) {
         parent[x] = x;
         size[x] = 1;
-        depth[x] = 1;
     }
 
     int FIND_SET(int x) {
@@ -50,11 +45,9 @@ public:
             if (size[root_x] < size[root_y]) {
                 parent[root_x] = root_y;
                 size[root_y] += size[root_x];
-                depth[root_y] = max(depth[root_y], depth[root_x] + 1);
             } else {
                 parent[root_y] = root_x;
                 size[root_x] += size[root_y];
-                depth[root_x] = max(depth[root_x], depth[root_y] + 1);
             }
         }
     }
@@ -67,13 +60,9 @@ public:
         }
         return true;
     }
-
-    int get_max_depth() {
-        return *max_element(depth.begin(), depth.end());
-    }
 };
 
-void run_experiment(int n, int m, double union_ratio, ofstream &file, mt19937 &gen, map<tuple<int, int, double>, tuple<double, int, int, int, int>> &results) {
+void run_experiment(int n, ofstream &file, map<int, tuple<double, int>> &results) {
     DisjointSet ds(n);
     auto start = chrono::high_resolution_clock::now();
 
@@ -81,94 +70,57 @@ void run_experiment(int n, int m, double union_ratio, ofstream &file, mt19937 &g
         ds.MAKE_SET(i);
     }
 
-    uniform_int_distribution<> dist(0, n - 1);
-    bernoulli_distribution op_dist(union_ratio);
-
-    int union_count = 0;
-    int find_set_count = 0;
-
-    for (int i = n; i < m; i++) {
-        int x = dist(gen);
-        int y = dist(gen);
-
-        if (op_dist(gen)) {
-            ds.UNION(x, y);
-            union_count++;
-        } else {
-            ds.FIND_SET(x);
-            find_set_count++;
-        }
+    for (int i = 1; i < n; i++) {
+        ds.UNION(0, i);
     }
 
     auto end = chrono::high_resolution_clock::now();
     chrono::duration<double> elapsed_time = end - start;
 
     bool is_consistent = ds.check_consistency(n);
-    int max_depth = ds.get_max_depth();
 
     if (is_consistent) {
-        file << n << "," << m << "," << union_ratio << "," << elapsed_time.count() << "," << union_count << "," << find_set_count << "," << max_depth << ",Consistent" << endl;
+        file << n << "," << elapsed_time.count() << ",Consistent" << endl;
     } else {
-        file << n << "," << m << "," << union_ratio << "," << elapsed_time.count() << "," << union_count << "," << find_set_count << "," << max_depth << ",Inconsistent" << endl;
+        file << n << "," << elapsed_time.count() << ",Inconsistent" << endl;
     }
 
-    auto key = make_tuple(n, m, union_ratio);
-    if (results.find(key) == results.end()) {
-        results[key] = make_tuple(elapsed_time.count(), union_count, find_set_count, max_depth, 1);
+    if (results.find(n) == results.end()) {
+        results[n] = make_tuple(elapsed_time.count(), 1);
     } else {
-        auto &val = results[key];
+        auto &val = results[n];
         get<0>(val) += elapsed_time.count();
-        get<1>(val) += union_count;
-        get<2>(val) += find_set_count;
-        get<3>(val) += max_depth;
-        get<4>(val) += 1;
+        get<1>(val) += 1;
     }
 }
 
 int main() {
-    int num_elements[] = {1000, 5000, 10000};
-    int num_operations[] = {1000, 5000, 10000, 25000, 50000};
-    double union_ratios[] = {0.25, 0.5, 0.75};
-    int num_runs = 5;
+    int num_elements[] = {100, 500, 1000, 5000, 10000, 25000, 50000, 75000, 100000, 250000, 500000, 750000, 1000000};
+    int num_runs = 10;
 
     ofstream file("part_A_1.csv");
-    file << "Number of elements,Number of operations,Union ratio,Execution time,Union count,Find-Set count,Max Depth,Consistency Check" << endl;
+    file << "Number of elements,Execution time,Consistency Check" << endl;
 
     ofstream avg_file("part_A_1_averaged.csv");
-    avg_file << "Number of elements,Number of operations,Union ratio,Average Execution time,Average Union count,Average Find-Set count,Average Max Depth" << endl;
+    avg_file << "Number of elements,Average Execution time" << endl;
 
-    random_device rd;
-    mt19937 gen(rd());
-
-    map<tuple<int, int, double>, tuple<double, int, int, int, int>> results;
+    map<int, tuple<double, int>> results;
 
     for (int n : num_elements) {
-        for (int m : num_operations) {
-            if (n <= m) {
-                for (double ratio : union_ratios) {
-                    for (int run = 0; run < num_runs; run++) {
-                        run_experiment(n, m, ratio, file, gen, results);
-                    }
-                }
-            }
+        for (int run = 0; run < num_runs; run++) {
+            run_experiment(n, file, results);
         }
     }
 
     for (const auto &entry : results) {
-        auto key = entry.first;
+        int n = entry.first;
         auto val = entry.second;
-        int n = get<0>(key);
-        int m = get<1>(key);
-        double ratio = get<2>(key);
-        double avg_time = get<0>(val) / get<4>(val);
-        int avg_union_count = get<1>(val) / get<4>(val);
-        int avg_find_set_count = get<2>(val) / get<4>(val);
-        int avg_max_depth = get<3>(val) / get<4>(val);
-        avg_file << n << "," << m << "," << ratio << "," << avg_time << "," << avg_union_count << "," << avg_find_set_count << "," << avg_max_depth << endl;
+        double avg_time = get<0>(val) / get<1>(val);
+        avg_file << n << "," << avg_time << endl;
     }
 
     file.close();
     avg_file.close();
-    cout << "Extended experiment completed. Results saved to part_A_1_extended.csv and part_A_1_averaged.csv" << endl;
+    cout << "Experiment completed. Results saved to part_A_1.csv and part_A_1_averaged.csv" << endl;
     return 0;
 }
