@@ -1,3 +1,9 @@
+/*
+Theorem 21.2:
+Using the linked-list representation of disjoint sets and the weighted-union heuristic, a 
+sequence of 𝑚 MAKE-SET, UNION, and FIND-SET operations, n of which are MAKE-SET operations, 
+takes 𝑂(𝑚 + 𝑛log 𝑛) time.
+*/
 #include <iostream>
 #include <vector>
 #include <chrono>
@@ -8,70 +14,72 @@
 
 using namespace std;
 
-class Element {
-public:
-    int p;     
-    int rank;  
-
-    Element() : p(0), rank(0) {}
-};
-
 class DisjointSet {
 private:
-    vector<Element> elements;
+    vector<int> parent;
+    vector<int> rank;
+    int make_set_count;
+    int find_set_count;
+    int union_count;
 
 public:
     DisjointSet(int n) {
-        elements.resize(n);
-        for (int i = 0; i < n; i++) {
-            elements[i].p = i; // Initialize each element to be its own parent
-            elements[i].rank = 0; // Initialize rank
-        }
+        parent.resize(n);
+        rank.resize(n, 0);
+        make_set_count = 0;
+        find_set_count = 0;
+        union_count = 0;
     }
 
-    // Make-Set Operation: Initializes a single set for element x.
     void MAKE_SET(int x) {
-        elements[x].p = x;
-        elements[x].rank = 0; // Initialize rank
+        parent[x] = x;
+        rank[x] = 0;
+        make_set_count++;
     }
 
-    // Find-Set Operation with path compression: Returns the representative of the set that contains x.
     int FIND_SET(int x) {
-        if (elements[x].p != x) {
-            elements[x].p = FIND_SET(elements[x].p); // Path compression
+        find_set_count++;
+        if (parent[x] != x) {
+            parent[x] = FIND_SET(parent[x]); // Path compression
         }
-        return elements[x].p;
+        return parent[x];
     }
 
-    // Link function: Links the trees rooted at x and y.
     void LINK(int x, int y) {
-        if (elements[x].rank > elements[y].rank) {
-            elements[y].p = x;
+        if (rank[x] > rank[y]) {
+            parent[y] = x;
         } else {
-            elements[x].p = y;
-            if (elements[x].rank == elements[y].rank) {
-                elements[y].rank += 1; // Increase rank if they are the same
+            parent[x] = y;
+            if (rank[x] == rank[y]) {
+                rank[y]++;
             }
         }
     }
 
-    // Union Operation: Combines the two sets that contain x and y.
     void UNION(int x, int y) {
-        LINK(FIND_SET(x), FIND_SET(y));
+        union_count++;
+        int root_x = FIND_SET(x);
+        int root_y = FIND_SET(y);
+        if (root_x != root_y) {
+            LINK(root_x, root_y);
+        }
     }
 
-    // Check consistency of the Disjoint Set structure
     bool check_consistency(int n) {
         for (int i = 0; i < n; ++i) {
             if (FIND_SET(i) != FIND_SET(FIND_SET(i))) {
-                return false; // Inconsistent structure
+                return false;
             }
         }
-        return true; // Consistent structure
+        return true;
     }
+
+    int get_make_set_count() const { return make_set_count; }
+    int get_find_set_count() const { return find_set_count; }
+    int get_union_count() const { return union_count; }
 };
 
-void run_experiment(int n, ofstream &file, map<int, tuple<double, int>> &results) {
+void run_experiment(int n, ofstream &file, map<int, tuple<double, int, int, int, int>> &results) {
     DisjointSet ds(n);
     auto start = chrono::high_resolution_clock::now();
 
@@ -89,31 +97,34 @@ void run_experiment(int n, ofstream &file, map<int, tuple<double, int>> &results
     bool is_consistent = ds.check_consistency(n);
 
     if (is_consistent) {
-        file << n << "," << elapsed_time.count() << ",Consistent" << endl;
+        file << n << "," << elapsed_time.count() << ",Consistent," << ds.get_make_set_count() << "," << ds.get_find_set_count() << "," << ds.get_union_count() << endl;
     } else {
-        file << n << "," << elapsed_time.count() << ",Inconsistent" << endl;
+        file << n << "," << elapsed_time.count() << ",Inconsistent," << ds.get_make_set_count() << "," << ds.get_find_set_count() << "," << ds.get_union_count() << endl;
     }
 
     if (results.find(n) == results.end()) {
-        results[n] = make_tuple(elapsed_time.count(), 1);
+        results[n] = make_tuple(elapsed_time.count(), 1, ds.get_make_set_count(), ds.get_find_set_count(), ds.get_union_count());
     } else {
         auto &val = results[n];
         get<0>(val) += elapsed_time.count();
         get<1>(val) += 1;
+        get<2>(val) += ds.get_make_set_count();
+        get<3>(val) += ds.get_find_set_count();
+        get<4>(val) += ds.get_union_count();
     }
 }
 
 int main() {
-    int num_elements[] = {1000, 5000, 10000, 50000, 100000, 250000, 500000, 750000, 1000000};
+    int num_elements[] = {100, 500, 1000, 5000, 10000, 25000, 50000, 75000, 100000, 250000, 500000, 750000, 1000000};
     int num_runs = 10;
 
     ofstream file("part_A_2.csv");
-    file << "Number of elements,Execution time,Consistency Check" << endl;
+    file << "Number of elements,Execution time,Consistency Check,MAKE_SET Count,FIND_SET Count,UNION Count" << endl;
 
     ofstream avg_file("part_A_2_averaged.csv");
-    avg_file << "Number of elements,Average Execution time" << endl;
+    avg_file << "Number of elements,Average Execution time,Average MAKE_SET Count,Average FIND_SET Count,Average UNION Count" << endl;
 
-    map<int, tuple<double, int>> results;
+    map<int, tuple<double, int, int, int, int>> results;
 
     for (int n : num_elements) {
         for (int run = 0; run < num_runs; run++) {
@@ -125,7 +136,10 @@ int main() {
         int n = entry.first;
         auto val = entry.second;
         double avg_time = get<0>(val) / get<1>(val);
-        avg_file << n << "," << avg_time << endl;
+        double avg_make_set = static_cast<double>(get<2>(val)) / get<1>(val);
+        double avg_find_set = static_cast<double>(get<3>(val)) / get<1>(val);
+        double avg_union = static_cast<double>(get<4>(val)) / get<1>(val);
+        avg_file << n << "," << avg_time << "," << avg_make_set << "," << avg_find_set << "," << avg_union << endl;
     }
 
     file.close();
