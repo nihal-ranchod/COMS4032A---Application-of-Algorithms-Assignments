@@ -9,6 +9,7 @@
 using namespace std;
 
 struct Set;
+struct Element;
 
 struct Element {
     int value;
@@ -29,74 +30,42 @@ struct Set {
 };
 
 class DisjointSet {
-private:
-    vector<Element*> elements;
-
 public:
+    vector<Set*> sets;
+
     DisjointSet(int n) {
-        elements.resize(n, nullptr);
+        sets.reserve(n);
     }
 
     void MAKE_SET(int x) {
         Element* elem = new Element(x);
-        elements[x] = elem;
-        new Set(elem);
+        Set* newSet = new Set(elem);
+        sets.push_back(newSet);
     }
 
-    Set* FIND_SET(int x) {
-        return elements[x]->owner;
+    Set* FIND_SET(Element* elem) {
+        return elem->owner;
     }
 
     void UNION(int x, int y) {
-        Set* setX = FIND_SET(x);
-        Set* setY = FIND_SET(y);
+        Set* setX = FIND_SET(sets[x]->head);
+        Set* setY = FIND_SET(sets[y]->head);
 
         if (setX != setY) {
-            Set* extended_set;
-            Set* discarded_set;
-
-            // Choose the larger set to be the extended set
-            if (setX->size >= setY->size) {
-                extended_set = setX;
-                discarded_set = setY;
-            } else {
-                extended_set = setY;
-                discarded_set = setX;
+            // Weighted union heuristic
+            if (setX->size < setY->size) {
+                swap(setX, setY);
             }
-
-            // Link the tail of the extended set to the head of the discarded set
-            extended_set->tail->next = discarded_set->head;
-            extended_set->tail = discarded_set->tail;
-            extended_set->size += discarded_set->size;
-
-            // Update the owner of all elements in the discarded set
-            Element* current = discarded_set->head;
-            while (current != nullptr) {
-                current->owner = extended_set;
+            // Attach setY to setX
+            setX->tail->next = setY->head;
+            setX->tail = setY->tail;
+            Element* current = setY->head;
+            while (current) {
+                current->owner = setX;
                 current = current->next;
             }
-
-            // Free memory of discarded set
-            delete discarded_set;
-        }
-    }
-
-    void printSet(int x) {
-        Set* set = FIND_SET(x);
-        Element* current = set->head;
-        while (current != nullptr) {
-            cout << current->value << " ";
-            current = current->next;
-        }
-        cout << endl;
-    }
-
-    // Destructor to free all allocated memory
-    ~DisjointSet() {
-        for (Element* elem : elements) {
-            if (elem) {
-                delete elem;
-            }
+            setX->size += setY->size;
+            delete setY;
         }
     }
 };

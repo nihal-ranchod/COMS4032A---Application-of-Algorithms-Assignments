@@ -4,96 +4,71 @@
 #include <fstream>
 #include <map>
 #include <tuple>
+#include <algorithm>
 
 using namespace std;
 
-struct Set;
-
 struct Element {
     int value;
-    Element* next;
-    Set* owner;
+    Element* parent;
+    int rank;
 
-    Element(int val) : value(val), next(nullptr), owner(nullptr) {}
+    Element(int val) : value(val), parent(this), rank(0) {}  // Initially, an element is its own parent.
 };
 
 struct Set {
-    Element* head;
-    Element* tail;
-    int rank;
+    Element* head;  // Points to an element in the set
+    int size;
 
-    Set(Element* elem) : head(elem), tail(elem), rank(0) {
-        elem->owner = this;
-    }
+    Set(Element* elem) : head(elem), size(1) {}
 };
 
 class DisjointSet {
-private:
-    vector<Element*> elements;
-    vector<Set*> sets;
-
 public:
+    vector<Set*> sets;  // Stores all sets
+
     DisjointSet(int n) {
-        elements.resize(n, nullptr);
-        sets.reserve(n); // Reserve memory for sets
+        sets.reserve(n);
     }
 
     void MAKE_SET(int x) {
         Element* elem = new Element(x);
-        elements[x] = elem;
         Set* newSet = new Set(elem);
-        sets.push_back(newSet); // Store reference to manage memory
+        sets.push_back(newSet);  // Create a new set for the element.
     }
 
-    Element* FIND_SET(int x) {
-        Element* elem = elements[x];
-        if (elem->owner->head != elem) {
-            elem->owner->head = FIND_SET(elem->owner->head->value); // Path compression heuristic
+    // Path compression heuristic
+    Element* FIND_SET(Element* elem) {
+        if (elem->parent != elem) {
+            elem->parent = FIND_SET(elem->parent);  // Recursively find the root and compress the path.
         }
-        return elem->owner->head;
-    }
-
-    void LINK(Set* setX, Set* setY) {
-        if (setX->rank > setY->rank) {
-            setY->head->owner = setX;
-            setX->tail->next = setY->head;
-            setX->tail = setY->tail;
-        } else {
-            setX->head->owner = setY;
-            setY->tail->next = setX->head;
-            setY->tail = setX->tail;
-            if (setX->rank == setY->rank) {
-                setY->rank++;
-            }
-        }
+        return elem->parent;
     }
 
     void UNION(int x, int y) {
-        Element* repX = FIND_SET(x);
-        Element* repY = FIND_SET(y);
+        Element* rootX = FIND_SET(sets[x]->head);
+        Element* rootY = FIND_SET(sets[y]->head);
 
-        if (repX != repY) {
-            LINK(repX->owner, repY->owner);
+        if (rootX != rootY) {
+            // Union by rank heuristic
+            if (rootX->rank < rootY->rank) {
+                rootX->parent = rootY;  // Attach smaller rank tree under larger rank tree.
+            } else if (rootX->rank > rootY->rank) {
+                rootY->parent = rootX;  // Attach smaller rank tree under larger rank tree.
+            } else {
+                rootY->parent = rootX;  // Attach one tree under the other.
+                rootX->rank++;  // Increase the rank of the new root.
+            }
+            // Optionally, you can update the size of the new root set if needed
+            // sets[x]->size += sets[y]->size; // Update size here if needed
         }
     }
 
-    void printSet(int x) {
-        Set* set = elements[x]->owner;
-        Element* current = set->head;
-        while (current != nullptr) {
-            cout << current->value << " ";
-            current = current->next;
-        }
-        cout << endl;
-    }
-
-    // Destructor to free allocated memory
     ~DisjointSet() {
-        for (Element* elem : elements) {
-            delete elem;
-        }
-        for (Set* set : sets) {
-            delete set;
+        // Clean up allocated memory for elements and sets.
+        for (auto elem : sets) {
+            delete elem->head;  // Deleting the head element.
+            delete elem;        // Deleting the set.
         }
     }
 };
@@ -103,11 +78,11 @@ void run_experiment(int n, ofstream &file, map<int, tuple<double, int>> &results
     auto start = chrono::high_resolution_clock::now();
 
     for (int i = 0; i < n; i++) {
-        ds.MAKE_SET(i);
+        ds.MAKE_SET(i);  // Create individual sets for each element.
     }
 
     for (int i = 1; i < n; i++) {
-        ds.UNION(0, i);
+        ds.UNION(0, i);  // Union all elements with the first element.
     }
 
     auto end = chrono::high_resolution_clock::now();
