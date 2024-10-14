@@ -8,81 +8,71 @@
 
 using namespace std;
 
-class Node {
-public:
-    int parent;
-    int rank;
+struct Node {
+    int value;
+    Node* next;
+    Node* representative;
+    int rank; // Rank of the set this node belongs to
 
-    Node(int p) : parent(p), rank(0) {}
+    Node(int val) : value(val), next(nullptr), representative(this), rank(0) {}
 };
 
 class DisjointSet {
 private:
-    vector<Node> nodes;
-    int make_set_count;
-    int find_set_count;
-    int union_count;
+    vector<Node*> head;  // Points to the head of each linked list
 
 public:
     DisjointSet(int n) {
-        nodes.reserve(n);
-        for (int i = 0; i < n; i++) {
-            nodes.emplace_back(i); // Initialize each node
-        }
-        make_set_count = 0;
-        find_set_count = 0;
-        union_count = 0;
+        head.resize(n, nullptr);
     }
 
     void MAKE_SET(int x) {
-        nodes[x].parent = x; // Initialize parent to itself
-        nodes[x].rank = 0;    // Initialize rank to 0
-        make_set_count++;
+        Node* node = new Node(x);
+        head[x] = node;
     }
 
-    int FIND_SET(int x) {
-        find_set_count++;
-        if (nodes[x].parent != x) {
-            nodes[x].parent = FIND_SET(nodes[x].parent); // Recursively find the parent
+    Node* FIND_SET(int x) {
+        Node* node = head[x];
+        if (node->representative != node) {
+            node->representative = FIND_SET(node->representative->value); // Path compression
         }
-        return nodes[x].parent;
+        return node->representative;
     }
 
-    void LINK(int x, int y) {
-        if (nodes[x].rank > nodes[y].rank) {
-            nodes[y].parent = x; // y becomes child of x
+    void LINK(Node* repX, Node* repY) {
+        if (repX->rank > repY->rank) {
+            repY->representative = repX;
+        } else if (repX->rank < repY->rank) {
+            repX->representative = repY;
         } else {
-            nodes[x].parent = y; // x becomes child of y
-            if (nodes[x].rank == nodes[y].rank) {
-                nodes[y].rank++; // Increase rank if they were equal
-            }
+            repY->representative = repX;
+            repX->rank++;
         }
     }
 
     void UNION(int x, int y) {
-        union_count++;
-        int root_x = FIND_SET(x);
-        int root_y = FIND_SET(y);
-        if (root_x != root_y) {
-            LINK(root_x, root_y);
+        Node* repX = FIND_SET(x);
+        Node* repY = FIND_SET(y);
+
+        if (repX != repY) {
+            LINK(repX, repY);
         }
     }
 
-    bool check_consistency(int n) {
-        for (int i = 0; i < n; ++i) {
-            if (FIND_SET(i) != FIND_SET(FIND_SET(i))) {
-                return false; // Check for inconsistencies
+    void printSet(int x) {
+        Node* rep = FIND_SET(x);
+        Node* current = head[x];
+        while (current != nullptr) {
+            if (current->representative == rep) {
+                cout << current->value << " ";
             }
+            current = current->next;
         }
-        return true;
+        cout << endl;
     }
-
-    int get_make_set_count() const { return make_set_count; }
-    int get_find_set_count() const { return find_set_count; }
-    int get_union_count() const { return union_count; }
 };
 
-void run_experiment(int n, ofstream &file, map<int, tuple<double, int, int, int, int>> &results) {
+void run_experiment(int n, ofstream &file, map<int, tuple<double, int>> &results) {
     DisjointSet ds(n);
     auto start = chrono::high_resolution_clock::now();
 
@@ -97,37 +87,28 @@ void run_experiment(int n, ofstream &file, map<int, tuple<double, int, int, int,
     auto end = chrono::high_resolution_clock::now();
     chrono::duration<double> elapsed_time = end - start;
 
-    bool is_consistent = ds.check_consistency(n);
-
-    if (is_consistent) {
-        file << n << "," << elapsed_time.count() << ",Consistent," << ds.get_make_set_count() << "," << ds.get_find_set_count() << "," << ds.get_union_count() << endl;
-    } else {
-        file << n << "," << elapsed_time.count() << ",Inconsistent," << ds.get_make_set_count() << "," << ds.get_find_set_count() << "," << ds.get_union_count() << endl;
-    }
+    file << n << "," << elapsed_time.count() << endl;
 
     if (results.find(n) == results.end()) {
-        results[n] = make_tuple(elapsed_time.count(), 1, ds.get_make_set_count(), ds.get_find_set_count(), ds.get_union_count());
+        results[n] = make_tuple(elapsed_time.count(), 1);
     } else {
         auto &val = results[n];
         get<0>(val) += elapsed_time.count();
         get<1>(val) += 1;
-        get<2>(val) += ds.get_make_set_count();
-        get<3>(val) += ds.get_find_set_count();
-        get<4>(val) += ds.get_union_count();
     }
 }
 
 int main() {
-    int num_elements[] = {100, 500, 1000, 5000, 10000, 25000, 50000, 75000, 100000, 250000, 500000, 750000, 1000000};
-    int num_runs = 10;
+    int num_elements[] = {100, 500, 1000, 5000, 10000, 25000, 50000, 75000, 100000, 250000};
+    int num_runs = 5;
 
     ofstream file("part_A_2.csv");
-    file << "Number of elements,Execution time,Consistency Check,MAKE_SET Count,FIND_SET Count,UNION Count" << endl;
+    file << "Number of elements,Execution time" << endl;
 
     ofstream avg_file("part_A_2_averaged.csv");
-    avg_file << "Number of elements,Average Execution time,Average MAKE_SET Count,Average FIND_SET Count,Average UNION Count" << endl;
+    avg_file << "Number of elements,Average Execution time" << endl;
 
-    map<int, tuple<double, int, int, int, int>> results;
+    map<int, tuple<double, int>> results;
 
     for (int n : num_elements) {
         for (int run = 0; run < num_runs; run++) {
@@ -139,10 +120,7 @@ int main() {
         int n = entry.first;
         auto val = entry.second;
         double avg_time = get<0>(val) / get<1>(val);
-        double avg_make_set = static_cast<double>(get<2>(val)) / get<1>(val);
-        double avg_find_set = static_cast<double>(get<3>(val)) / get<1>(val);
-        double avg_union = static_cast<double>(get<4>(val)) / get<1>(val);
-        avg_file << n << "," << avg_time << "," << avg_make_set << "," << avg_find_set << "," << avg_union << endl;
+        avg_file << n << "," << avg_time << endl;
     }
 
     file.close();
