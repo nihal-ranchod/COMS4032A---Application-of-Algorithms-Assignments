@@ -4,90 +4,101 @@
 #include <fstream>
 #include <map>
 #include <tuple>
-#include <algorithm> // For std::max
+#include <algorithm>
 
 using namespace std;
 
-struct Node {
-    int value;
-    Node* next;
-    Node* representative;
-    int size; // Size of the set this node belongs to
+struct Set;
 
-    Node(int val) : value(val), next(nullptr), representative(this), size(1) {}
+struct Element {
+    int value;
+    Element* next;
+    Set* owner;
+
+    Element(int val) : value(val), next(nullptr), owner(nullptr) {}
+};
+
+struct Set {
+    Element* head;
+    Element* tail;
+    int size;
+
+    Set(Element* elem) : head(elem), tail(elem), size(1) {
+        elem->owner = this;
+    }
 };
 
 class DisjointSet {
 private:
-    vector<Node*> head;  // Points to the head of each linked list
+    vector<Element*> elements;
 
 public:
     DisjointSet(int n) {
-        head.resize(n, nullptr);
+        elements.resize(n, nullptr);
     }
 
     void MAKE_SET(int x) {
-        Node* node = new Node(x);
-        head[x] = node;
+        Element* elem = new Element(x);
+        elements[x] = elem;
+        new Set(elem);
     }
 
-    Node* FIND_SET(int x) {
-        Node* node = head[x];
-        return node->representative;
+    Set* FIND_SET(int x) {
+        return elements[x]->owner;
     }
 
     void UNION(int x, int y) {
-        Node* repX = FIND_SET(x);
-        Node* repY = FIND_SET(y);
+        Set* setX = FIND_SET(x);
+        Set* setY = FIND_SET(y);
 
-        if (repX != repY) {
-            if (repX->size >= repY->size) {
-                // Append the list of y to the list of x
-                Node* temp = repX;
-                while (temp->next != nullptr) {
-                    temp = temp->next;
-                }
-                temp->next = repY;
+        if (setX != setY) {
+            Set* extended_set;
+            Set* discarded_set;
 
-                // Update the representative and size of all nodes in y's list
-                Node* current = repY;
-                while (current != nullptr) {
-                    current->representative = repX;
-                    current = current->next;
-                }
-                repX->size += repY->size;
+            // Choose the larger set to be the extended set
+            if (setX->size >= setY->size) {
+                extended_set = setX;
+                discarded_set = setY;
             } else {
-                // Append the list of x to the list of y
-                Node* temp = repY;
-                while (temp->next != nullptr) {
-                    temp = temp->next;
-                }
-                temp->next = repX;
-
-                // Update the representative and size of all nodes in x's list
-                Node* current = repX;
-                while (current != nullptr) {
-                    current->representative = repY;
-                    current = current->next;
-                }
-                repY->size += repX->size;
+                extended_set = setY;
+                discarded_set = setX;
             }
 
+            // Link the tail of the extended set to the head of the discarded set
+            extended_set->tail->next = discarded_set->head;
+            extended_set->tail = discarded_set->tail;
+            extended_set->size += discarded_set->size;
+
+            // Update the owner of all elements in the discarded set
+            Element* current = discarded_set->head;
+            while (current != nullptr) {
+                current->owner = extended_set;
+                current = current->next;
+            }
+
+            // Free memory of discarded set
+            delete discarded_set;
         }
     }
 
     void printSet(int x) {
-        Node* rep = FIND_SET(x);
-        Node* current = head[x];
+        Set* set = FIND_SET(x);
+        Element* current = set->head;
         while (current != nullptr) {
-            if (current->representative == rep) {
-                cout << current->value << " ";
-            }
+            cout << current->value << " ";
             current = current->next;
         }
         cout << endl;
     }
 
+    // Destructor to free all allocated memory
+    ~DisjointSet() {
+        for (Element* elem : elements) {
+            if (elem) {
+                delete elem;
+            }
+        }
+    }
 };
 
 void run_experiment(int n, ofstream &file, map<int, tuple<double, int>> &results) {

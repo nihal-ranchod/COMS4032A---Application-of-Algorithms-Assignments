@@ -4,71 +4,97 @@
 #include <fstream>
 #include <map>
 #include <tuple>
-#include <algorithm> // For std::max
 
 using namespace std;
 
-struct Node {
-    int value;
-    Node* next;
-    Node* representative;
-    int rank; // Rank of the set this node belongs to
+struct Set;
 
-    Node(int val) : value(val), next(nullptr), representative(this), rank(0) {}
+struct Element {
+    int value;
+    Element* next;
+    Set* owner;
+
+    Element(int val) : value(val), next(nullptr), owner(nullptr) {}
+};
+
+struct Set {
+    Element* head;
+    Element* tail;
+    int rank;
+
+    Set(Element* elem) : head(elem), tail(elem), rank(0) {
+        elem->owner = this;
+    }
 };
 
 class DisjointSet {
 private:
-    vector<Node*> head;  // Points to the head of each linked list
+    vector<Element*> elements;
+    vector<Set*> sets;
 
 public:
     DisjointSet(int n) {
-        head.resize(n, nullptr);
+        elements.resize(n, nullptr);
+        sets.reserve(n); // Reserve memory for sets
     }
 
     void MAKE_SET(int x) {
-        Node* node = new Node(x);
-        head[x] = node;
+        Element* elem = new Element(x);
+        elements[x] = elem;
+        Set* newSet = new Set(elem);
+        sets.push_back(newSet); // Store reference to manage memory
     }
 
-    Node* FIND_SET(int x) {
-        Node* node = head[x];
-        if (node->representative != node) {
-            node->representative = FIND_SET(node->representative->value); // Path compression
+    Element* FIND_SET(int x) {
+        Element* elem = elements[x];
+        if (elem->owner->head != elem) {
+            elem->owner->head = FIND_SET(elem->owner->head->value); // Path compression heuristic
         }
-        return node->representative;
+        return elem->owner->head;
     }
 
-    void LINK(Node* repX, Node* repY) {
-        if (repX->rank > repY->rank) {
-            repY->representative = repX;
-        } else if (repX->rank < repY->rank) {
-            repX->representative = repY;
+    void LINK(Set* setX, Set* setY) {
+        if (setX->rank > setY->rank) {
+            setY->head->owner = setX;
+            setX->tail->next = setY->head;
+            setX->tail = setY->tail;
         } else {
-            repY->representative = repX;
-            repX->rank++;
+            setX->head->owner = setY;
+            setY->tail->next = setX->head;
+            setY->tail = setX->tail;
+            if (setX->rank == setY->rank) {
+                setY->rank++;
+            }
         }
     }
 
     void UNION(int x, int y) {
-        Node* repX = FIND_SET(x);
-        Node* repY = FIND_SET(y);
+        Element* repX = FIND_SET(x);
+        Element* repY = FIND_SET(y);
 
         if (repX != repY) {
-            LINK(repX, repY);
+            LINK(repX->owner, repY->owner);
         }
     }
 
     void printSet(int x) {
-        Node* rep = FIND_SET(x);
-        Node* current = head[x];
+        Set* set = elements[x]->owner;
+        Element* current = set->head;
         while (current != nullptr) {
-            if (current->representative == rep) {
-                cout << current->value << " ";
-            }
+            cout << current->value << " ";
             current = current->next;
         }
         cout << endl;
+    }
+
+    // Destructor to free allocated memory
+    ~DisjointSet() {
+        for (Element* elem : elements) {
+            delete elem;
+        }
+        for (Set* set : sets) {
+            delete set;
+        }
     }
 };
 
