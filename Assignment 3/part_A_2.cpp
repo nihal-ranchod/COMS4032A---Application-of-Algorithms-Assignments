@@ -1,9 +1,3 @@
-/*
-Theorem 21.2:
-Using the linked-list representation of disjoint sets and the weighted-union heuristic, a 
-sequence of 𝑚 MAKE-SET, UNION, and FIND-SET operations, n of which are MAKE-SET operations, 
-takes 𝑂(𝑚 + 𝑛log 𝑛) time.
-*/
 #include <iostream>
 #include <vector>
 #include <chrono>
@@ -14,44 +8,53 @@ takes 𝑂(𝑚 + 𝑛log 𝑛) time.
 
 using namespace std;
 
+class Node {
+public:
+    int parent;
+    int rank;
+
+    Node(int p) : parent(p), rank(0) {}
+};
+
 class DisjointSet {
 private:
-    vector<int> parent;
-    vector<int> rank;
+    vector<Node> nodes;
     int make_set_count;
     int find_set_count;
     int union_count;
 
 public:
     DisjointSet(int n) {
-        parent.resize(n);
-        rank.resize(n, 0);
+        nodes.reserve(n);
+        for (int i = 0; i < n; i++) {
+            nodes.emplace_back(i); // Initialize each node
+        }
         make_set_count = 0;
         find_set_count = 0;
         union_count = 0;
     }
 
     void MAKE_SET(int x) {
-        parent[x] = x;
-        rank[x] = 0;
+        nodes[x].parent = x; // Initialize parent to itself
+        nodes[x].rank = 0;    // Initialize rank to 0
         make_set_count++;
     }
 
     int FIND_SET(int x) {
         find_set_count++;
-        if (parent[x] != x) {
-            parent[x] = FIND_SET(parent[x]); // Path compression
+        if (nodes[x].parent != x) {
+            nodes[x].parent = FIND_SET(nodes[x].parent); // Recursively find the parent
         }
-        return parent[x];
+        return nodes[x].parent;
     }
 
     void LINK(int x, int y) {
-        if (rank[x] > rank[y]) {
-            parent[y] = x;
+        if (nodes[x].rank > nodes[y].rank) {
+            nodes[y].parent = x; // y becomes child of x
         } else {
-            parent[x] = y;
-            if (rank[x] == rank[y]) {
-                rank[y]++;
+            nodes[x].parent = y; // x becomes child of y
+            if (nodes[x].rank == nodes[y].rank) {
+                nodes[y].rank++; // Increase rank if they were equal
             }
         }
     }
@@ -68,7 +71,7 @@ public:
     bool check_consistency(int n) {
         for (int i = 0; i < n; ++i) {
             if (FIND_SET(i) != FIND_SET(FIND_SET(i))) {
-                return false;
+                return false; // Check for inconsistencies
             }
         }
         return true;

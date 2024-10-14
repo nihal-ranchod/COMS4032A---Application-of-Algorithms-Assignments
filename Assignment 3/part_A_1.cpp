@@ -1,9 +1,3 @@
-/*
-Theorem 21.2:
-Using the linked-list representation of disjoint sets and the weighted-union heuristic, a 
-sequence of 𝑚 MAKE-SET, UNION, and FIND-SET operations, n of which are MAKE-SET operations, 
-takes 𝑂(𝑚 + 𝑛log 𝑛) time.
-*/
 #include <iostream>
 #include <vector>
 #include <chrono>
@@ -14,48 +8,73 @@ takes 𝑂(𝑚 + 𝑛log 𝑛) time.
 
 using namespace std;
 
+struct Node {
+    int value;
+    Node* next;
+    int size; // Size of the set this node belongs to
+
+    Node(int val) : value(val), next(nullptr), size(1) {}
+};
+
 class DisjointSet {
 private:
-    vector<int> parent;  
-    vector<int> size;
+    vector<Node*> head;  // Points to the head of each linked list
     int make_set_count;
     int find_set_count;
     int union_count;
 
 public:
     DisjointSet(int n) {
-        parent.resize(n);
-        size.resize(n, 1);
+        head.resize(n, nullptr);
         make_set_count = 0;
         find_set_count = 0;
         union_count = 0;
     }
 
     void MAKE_SET(int x) {
-        parent[x] = x;
-        size[x] = 1;
+        head[x] = new Node(x);
         make_set_count++;
     }
 
     int FIND_SET(int x) {
         find_set_count++;
-        while (parent[x] != x) {
-            x = parent[x];
+        Node* current = head[x];
+        while (current->next != nullptr) {
+            current = current->next;
         }
-        return x;
+        return current->value; // Return the last element in the linked list as the representative
     }
 
     void UNION(int x, int y) {
         union_count++;
         int root_x = FIND_SET(x);
         int root_y = FIND_SET(y);
+
         if (root_x != root_y) {
-            if (size[root_x] < size[root_y]) {
-                parent[root_x] = root_y;
-                size[root_y] += size[root_x];
+            Node* list_x = head[root_x];
+            Node* list_y = head[root_y];
+
+            // Union by size
+            if (list_x->size < list_y->size) {
+                // Append list_x to list_y
+                Node* current = list_x;
+                while (current->next != nullptr) {
+                    current = current->next;
+                }
+                current->next = list_y;
+                list_y->size += list_x->size;
+                delete list_x; // Free the memory of list_x
+                head[root_x] = head[root_y]; // Update the head to point to the new root
             } else {
-                parent[root_y] = root_x;
-                size[root_x] += size[root_y];
+                // Append list_y to list_x
+                Node* current = list_y;
+                while (current->next != nullptr) {
+                    current = current->next;
+                }
+                current->next = list_x;
+                list_x->size += list_y->size;
+                delete list_y; // Free the memory of list_y
+                head[root_y] = head[root_x]; // Update the head to point to the new root
             }
         }
     }
