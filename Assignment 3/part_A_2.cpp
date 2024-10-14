@@ -8,24 +8,31 @@
 
 using namespace std;
 
+struct Set;
+struct Element;
+
 struct Element {
     int value;
-    Element* parent;
-    int rank;
+    Element* next;
+    Set* owner;
 
-    Element(int val) : value(val), parent(this), rank(0) {}  // Initially, an element is its own parent.
+    Element(int val) : value(val), next(nullptr), owner(nullptr) {}
 };
 
 struct Set {
-    Element* head;  // Points to an element in the set
-    int size;
+    Element* head;  // Head of the set
+    Element* tail;  // Tail of the set
+    int size;       // Size of the set
+    int rank;       // Rank of the set (for union by rank)
 
-    Set(Element* elem) : head(elem), size(1) {}
+    Set(Element* elem) : head(elem), tail(elem), size(1), rank(0) {
+        elem->owner = this;
+    }
 };
 
 class DisjointSet {
 public:
-    vector<Set*> sets;  // Stores all sets
+    vector<Set*> sets;
 
     DisjointSet(int n) {
         sets.reserve(n);
@@ -34,41 +41,36 @@ public:
     void MAKE_SET(int x) {
         Element* elem = new Element(x);
         Set* newSet = new Set(elem);
-        sets.push_back(newSet);  // Create a new set for the element.
+        sets.push_back(newSet);
     }
 
-    // Path compression heuristic
-    Element* FIND_SET(Element* elem) {
-        if (elem->parent != elem) {
-            elem->parent = FIND_SET(elem->parent);  // Recursively find the root and compress the path.
+    Set* FIND_SET(Element* elem) {
+        // Path compression
+        if (elem->owner->head != elem) {
+            elem->owner = FIND_SET(elem->owner->head);
         }
-        return elem->parent;
+        return elem->owner;
+    }
+
+    void LINK(Set* setX, Set* setY) {
+        // Union by rank heuristic
+        if (setX->rank > setY->rank) {
+            setY->head->owner = setX;
+        } else {
+            setX->head->owner = setY;
+            if (setX->rank == setY->rank) {
+                setY->rank++;
+            }
+        }
     }
 
     void UNION(int x, int y) {
-        Element* rootX = FIND_SET(sets[x]->head);
-        Element* rootY = FIND_SET(sets[y]->head);
+        // Union by rank heuristic
+        Set* setX = FIND_SET(sets[x]->head);
+        Set* setY = FIND_SET(sets[y]->head);
 
-        if (rootX != rootY) {
-            // Union by rank heuristic
-            if (rootX->rank < rootY->rank) {
-                rootX->parent = rootY;  // Attach smaller rank tree under larger rank tree.
-            } else if (rootX->rank > rootY->rank) {
-                rootY->parent = rootX;  // Attach smaller rank tree under larger rank tree.
-            } else {
-                rootY->parent = rootX;  // Attach one tree under the other.
-                rootX->rank++;  // Increase the rank of the new root.
-            }
-            // Optionally, you can update the size of the new root set if needed
-            // sets[x]->size += sets[y]->size; // Update size here if needed
-        }
-    }
-
-    ~DisjointSet() {
-        // Clean up allocated memory for elements and sets.
-        for (auto elem : sets) {
-            delete elem->head;  // Deleting the head element.
-            delete elem;        // Deleting the set.
+        if (setX != setY) {
+            LINK(setX, setY);
         }
     }
 };
@@ -78,11 +80,11 @@ void run_experiment(int n, ofstream &file, map<int, tuple<double, int>> &results
     auto start = chrono::high_resolution_clock::now();
 
     for (int i = 0; i < n; i++) {
-        ds.MAKE_SET(i);  // Create individual sets for each element.
+        ds.MAKE_SET(i);
     }
 
     for (int i = 1; i < n; i++) {
-        ds.UNION(0, i);  // Union all elements with the first element.
+        ds.UNION(0, i);
     }
 
     auto end = chrono::high_resolution_clock::now();
