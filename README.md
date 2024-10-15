@@ -35,3 +35,9 @@ g++ correctness_check_partB.cpp -o checkB
 ```
 
 ### Assignment 3: [Assignment 3 PDF](./Assignment%203/Assignment3.pdf)
+
+To run the experiments for the Disjoint Set Operations:
+```bash
+g++ -std=c++17 -o ds disjoint_set.cpp
+./ds
+```
