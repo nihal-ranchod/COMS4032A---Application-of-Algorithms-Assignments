@@ -168,7 +168,7 @@ void run_experiment(int n, ofstream &file, map<int, tuple<double, double, double
 
 // Main function with averaging and output to a separate CSV file
 int main() {
-    int num_elements[] = {100, 500, 1000, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000};
+    int num_elements[] = {100, 500, 1000, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000, 5000000, 10000000};
     int num_runs = 5;
 
     ofstream file("disjoint_set_experiment.csv");
