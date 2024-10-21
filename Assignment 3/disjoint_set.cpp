@@ -46,21 +46,38 @@ Element* FindSet(Element* elem) {
     }
     return elem;
 }
-// Basic Union operation
+
+// Brute-force Basic Union operation
 void BasicUnion(Element* elem1, Element* elem2) {
     Element* root1 = FindSet(elem1);
     Element* root2 = FindSet(elem2);
 
-    if (root1 == root2) return;
+    // If they are already in the same set, still go through the brute-force process
+    Set* set1 = root1->owner;
+    Set* set2 = root2->owner;
 
-    Element* current = root2;
-    while (current != nullptr) {
-        current->owner = root1->owner;
-        Element* temp = current->next;
-        delete current;
-        current = temp;
+    Element* current1 = set1->head;
+    while (current1 != nullptr) {
+        current1->parent = root1;  // Re-assign parent pointers in set1 to root1 (even if already correct)
+        current1 = current1->next;
+    }
+
+    Element* current2 = set2->head;
+    while (current2 != nullptr) {
+        current2->parent = root1;  // Re-assign parent pointers in set2 to root1
+        current2 = current2->next;
+    }
+
+    // Optionally merge set1 and set2 (can be done inefficiently by iterating again)
+    current1 = set1->head;
+    if (current1 != nullptr) {
+        while (current1->next != nullptr) {
+            current1 = current1->next;  // Move to the end of set1
+        }
+        current1->next = set2->head;  // Merge set2 at the end of set1
     }
 }
+
 
 // Weighted Union operation with tail pointer
 void WeightedUnion(Element* elem1, Element* elem2) {
@@ -78,7 +95,7 @@ void WeightedUnion(Element* elem1, Element* elem2) {
         Element* current = set2->head;
         while (current != nullptr) {
             current->owner = set1;
-            current->parent = set1->head;
+            current->parent = root1;  // Update parent to root1
             current = current->next;
         }
         set1->size += set2->size;
@@ -88,7 +105,7 @@ void WeightedUnion(Element* elem1, Element* elem2) {
         Element* current = set1->head;
         while (current != nullptr) {
             current->owner = set2;
-            current->parent = set2->head;
+            current->parent = root2;  // Update parent to root2
             current = current->next;
         }
         set2->size += set1->size;
@@ -120,6 +137,17 @@ void UnionByRank(Element* elem1, Element* elem2) {
     }
 }
 
+// Validation check to ensure all elements are in the same set
+bool validate_union(const vector<Element*>& elements) {
+    Element* representative = FindSet(elements[0]);
+    for (auto elem : elements) {
+        if (FindSet(elem) != representative) {
+            return false;
+        }
+    }
+    return true;
+}
+
 // Run experiment function
 void run_experiment(int n, ofstream &file, map<int, tuple<double, double, double>> &results) {
     vector<Element*> elements;
@@ -134,6 +162,11 @@ void run_experiment(int n, ofstream &file, map<int, tuple<double, double, double
     auto endUnion = chrono::high_resolution_clock::now();
     chrono::duration<double> union_elapsed_time = endUnion - startUnion;
 
+    // Validate the union operation
+    if (!validate_union(elements)) {
+        cerr << "Error: BasicUnion failed for " << n << " elements." << endl;
+    }
+
     elements.clear();
     for (int i = 0; i < n; i++) {
         elements.push_back(MakeSet(i)->head);
@@ -145,6 +178,11 @@ void run_experiment(int n, ofstream &file, map<int, tuple<double, double, double
     }
     auto endWeightedUnion = chrono::high_resolution_clock::now();
     chrono::duration<double> weighted_union_elapsed_time = endWeightedUnion - startWeightedUnion;
+
+    // Validate the union operation
+    if (!validate_union(elements)) {
+        cerr << "Error: WeightedUnion failed for " << n << " elements." << endl;
+    }
 
     elements.clear();
     for (int i = 0; i < n; i++) {
@@ -158,6 +196,11 @@ void run_experiment(int n, ofstream &file, map<int, tuple<double, double, double
     auto endUnionByRank = chrono::high_resolution_clock::now();
     chrono::duration<double> union_by_rank_elapsed_time = endUnionByRank - startUnionByRank;
 
+    // Validate the union operation
+    if (!validate_union(elements)) {
+        cerr << "Error: UnionByRank failed for " << n << " elements." << endl;
+    }
+
     file << n << "," << union_elapsed_time.count() <<  "," << weighted_union_elapsed_time.count() << "," << union_by_rank_elapsed_time.count() << endl;
     results[n] = make_tuple(union_elapsed_time.count(), weighted_union_elapsed_time.count(), union_by_rank_elapsed_time.count());
 
@@ -168,7 +211,7 @@ void run_experiment(int n, ofstream &file, map<int, tuple<double, double, double
 
 // Main function with averaging and output to a separate CSV file
 int main() {
-    int num_elements[] = {100, 500, 1000, 5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000, 5000000, 10000000};
+    int num_elements[] = {100, 500, 1000, 5000, 10000, 25000, 50000, 100000};
     int num_runs = 5;
 
     ofstream file("disjoint_set_experiment.csv");
@@ -199,8 +242,6 @@ int main() {
 
     file.close();
     avg_file.close();
-
-    cout << "Experiment completed. Results saved to disjoint_set_experiment.csv and disjoint_set_average_results.csv" << endl;
 
     return 0;
 }
